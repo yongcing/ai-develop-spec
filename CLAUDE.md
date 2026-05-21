@@ -15,7 +15,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 | 後端 API/服務 | [30-backend/tech-stack.md](30-backend/tech-stack.md) + [30-backend/ai-generation-rules.md](30-backend/ai-generation-rules.md) + [00-architecture/api-contract-rules.md](00-architecture/api-contract-rules.md) |
 | 新增資料表/DB schema | [00-architecture/database-selection.md](00-architecture/database-selection.md) + 建立新 ADR |
 | 跨服務的架構變更 | [00-architecture/system-architecture.md](00-architecture/system-architecture.md) + 建立新 ADR |
-| UI prototype 落地 | [10-ux-design/design-principles.md](10-ux-design/design-principles.md) + [10-ux-design/design-tokens.json](10-ux-design/design-tokens.json) + [10-ux-design/component-inventory.md](10-ux-design/component-inventory.md) |
+| UI prototype 落地 | [10-ux-design/design-principles.md](10-ux-design/design-principles.md) + [10-ux-design/design-tokens.json](10-ux-design/design-tokens.json) + [10-ux-design/component-inventory.md](10-ux-design/component-inventory.md) + [10-ux-design/visual-parity-workflow.md](10-ux-design/visual-parity-workflow.md)（**強制**：每個 UI section 動工前先確認對應 `prototypes/screens/<section>.png` + `.measurements.md` 存在）|
 | 查詢／搜尋／篩選列表 | [00-architecture/adr/0002-query-builder.md](00-architecture/adr/0002-query-builder.md) |
 
 ## 硬規則（不可違反）

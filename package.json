@@ -1,0 +1,24 @@
+{
+  "name": "ai-develop-spec",
+  "version": "1.0.0",
+  "description": "跨角色協作的 AI 開發規格中心。所有 AI 生成程式碼的規則、技術選型、架構決策都集中在此。",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yongcing/ai-develop-spec.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/yongcing/ai-develop-spec/issues"
+  },
+  "homepage": "https://github.com/yongcing/ai-develop-spec#readme",
+  "devDependencies": {
+    "playwright": "^1.60.0",
+    "tsx": "^4.22.3"
+  }
+}

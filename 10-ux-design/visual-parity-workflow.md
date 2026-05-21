@@ -1,0 +1,146 @@
+# Prototype → MVP 視覺一致性工作流
+
+> 這份文件補上 [design-principles.md](design-principles.md) 「Prototype 流程」一節的缺口。
+> 之前的流程只抽 tokens 就動工，結果 MVP 跟 prototype 長相落差過大。本文件規範**每個 UI 區段必須執行的視覺對齊步驟**。
+
+## 核心原則
+
+「不直接複製 prototype 的 HTML」**不等於**「不參考 prototype 視覺」。
+要重新基於規範元件實作 — **但成品 layout、密度、間距、配色都要肉眼難以分辨**。
+
+## 必要產出（每個區段一份）
+
+對 prototype 內每個區段（例如 Overview、My Contracts、Contract Detail…），規格庫必須有：
+
+```
+prototypes/
+├─ <prototype-name>.html                  # 原始 prototype
+└─ screens/
+   └─ <prototype-name>/
+      ├─ overview.png                     # 1440x900 全頁截圖
+      ├─ overview.measurements.md         # 量出來的數字（見下）
+      ├─ my-contracts.png
+      ├─ my-contracts.measurements.md
+      └─ …
+```
+
+### 截圖規格
+
+- viewport：**1440×900**（桌面主要斷點）
+- 全頁（含 scroll），不是 above-the-fold
+- 抓乾淨狀態（有資料），另抓 empty / error / loading 各一張到 `<section>.states/`
+- 用 Playwright 自動化：
+
+```typescript
+// tools/capture-prototype-screens.ts
+import { chromium } from "playwright";
+
+const sections = [
+  { hash: "overview", name: "overview" },
+  { hash: "my-contracts", name: "my-contracts" },
+  // ...
+];
+
+(async () => {
+  const browser = await chromium.launch();
+  const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+  await page.goto("file:///D:/SideProjects/ai-develop-spec/10-ux-design/prototypes/V0_Covenant%20Data%20Platform.html");
+  for (const s of sections) {
+    await page.locator(`[data-section="${s.hash}"]`).click();
+    await page.waitForTimeout(300);
+    await page.screenshot({ path: `screens/covenant/${s.name}.png`, fullPage: true });
+  }
+  await browser.close();
+})();
+```
+
+放在 [tools/capture-prototype-screens.ts](tools/capture-prototype-screens.ts)；CI 每週重跑一次以偵測 prototype 漂移。
+
+### measurements.md 格式
+
+每個 section 一份，**用實測值不用估值**：
+
+```markdown
+# Overview measurements
+
+## Layout
+- Page content max-width: 1280px
+- Page padding (horizontal): 32px
+- Page padding (vertical): 28px
+- Grid gap: 20px
+
+## Sidebar
+- Width: 240px
+- Item height: 36px
+- Item horizontal padding: 12px
+- Active state: brand-primary/10 bg + brand-primary text + medium weight
+
+## Stat card
+- Min height: 112px
+- Padding: 20px
+- Label: text-sm text-neutral-700
+- Value: text-3xl font-semibold
+- Delta: text-xs, success (green) for positive
+- Icon position: top-right, brand-primary, 20px
+
+## Data table
+- Row height: 48px
+- Header height: 44px, bg-neutral-50, text-xs uppercase font-medium
+- Cell padding: 14px 16px
+- Divider: 1px neutral-100
+- Hover: neutral-50 bg
+
+## Typography
+- Page title (h1): text-2xl semibold (24px / 600)
+- Card title: text-lg semibold (18px / 600)
+- Body: text-sm (14px / 400)
+- Meta: text-xs text-neutral-700
+```
+
+量法：開 prototype → DevTools → 用 ruler / computed styles 抓真實數字，不要用 inspector estimate。
+
+## 開發流程（強制順序）
+
+對每個 section：
+
+1. **截圖 + 量** — 完成 `screens/<section>.png` + `screens/<section>.measurements.md`
+2. **元件盤點** — 對照 [component-inventory.md](component-inventory.md)，列出該 section 需要哪些 UI 元件；缺的先補（不要 inline 寫）
+3. **單頁實作** — 只實作這一個 section，**禁止**先抽 PageShell / DataTable 等共用層；除非 measurements 證明跨 section 結構一致
+4. **並排比對** — 開實作 dev server + prototype 同瀏覽器，1440x900 視窗左右各一，肉眼掃描差異；不合規的差異（見下）必須修
+5. **自動 diff** — 用 Playwright 對相同 URL 截圖，跟 `screens/<section>.png` 做 pixel diff；容忍門檻：總 diff pixels < 2% （字體 anti-aliasing 噪音）
+6. **抽共用**：兩個以上 section 重複的結構才能抽到 `components/ui/`，否則留在 feature 內
+
+> 違反順序會被 PR review 退回。AI 在做 UI section 時必須在 PR 描述貼 `screens/<section>.png` 並列當下實作截圖。
+
+## 「不合規差異」清單
+
+掃描比對時，下列**必修**：
+
+- 顏色不在 [design-tokens.json](design-tokens.json) 內
+- 間距與 measurements.md 差 ≥ 8px
+- 字級 / 字重與 measurements 不符
+- 缺重要視覺元素（icon、divider、badge）或多了 prototype 沒有的元素
+- 卡片 padding / radius / shadow 等容器規格不符
+- Layout 結構錯（grid 欄數、sidebar 位置、卡片排序）
+
+下列**可以不一致**（理由要寫 PR）：
+
+- 微互動（hover transition timing、focus ring 樣式 — 以 design-principles a11y 為準）
+- 圖示具體選用（prototype 可能用付費圖示，實作用 lucide）
+- Mock 文字與資料內容
+- 不影響視覺密度的微小 spacing 差 (<8px)
+
+## 共用元件抽取準則
+
+`components/ui/` 的元件**必須**在 ≥2 個 section 已實作後才能存在，且：
+
+- 命名與 [component-inventory.md](component-inventory.md) 對齊
+- 參數 / variant 來自實際 section 用法歸納，不臆造
+- 同名元件第三次重複時必抽，不可繼續 copy-paste
+
+## 對 AI 生成行為的影響
+
+- 生成 UI section 前**必先讀**對應 `screens/<section>.measurements.md`；找不到 → 停下，先做截圖 + 量值
+- 不准先建 PageShell / DataTable 等抽象；最多兩個 section 完成後再抽
+- PR 描述未附 prototype vs 實作並排截圖 → 該 UI PR 視為未完成（DoD 退回）
+- 每次 UI commit 必須 reference 對應的 measurements.md 路徑

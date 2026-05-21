@@ -111,7 +111,9 @@
 2. 輸出存放至 [prototypes/](prototypes/)
 3. 抽取的 design tokens 更新到 [design-tokens.json](design-tokens.json)
 4. 更新 [component-inventory.md](component-inventory.md) 以反映 prototype 用到的新元件
-5. 前端依 prototype + tokens 實作；不直接複製 prototype 的 HTML，要重新基於規範元件實作
+5. **每個 section 截圖 + 量測**：放到 `prototypes/screens/<section>.png` 與 `<section>.measurements.md`（細節見 [visual-parity-workflow.md](visual-parity-workflow.md)）
+6. 前端依 prototype + tokens 實作；不直接複製 prototype 的 HTML，要重新基於規範元件實作 — **但成品要與 prototype 視覺一致**（pixel diff < 2%，肉眼難以分辨）
+7. PR 必附 prototype vs 實作並排截圖，由 [/40-quality-gates/definition-of-done.md](../40-quality-gates/definition-of-done.md) 把關
 
 ## 對 AI 生成行為的影響
 
