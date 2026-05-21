@@ -1,8 +1,8 @@
 # ADR-0002: Query Builder 技術選型
 
-- 狀態：Proposed
+- 狀態：Accepted
 - 日期：2026-05-21
-- 決策者：yongcing（待 review）
+- 決策者：yongcing
 
 ## 背景
 
@@ -113,7 +113,7 @@
 
 ### 負面 / 取捨
 
-- 不支援「跨 entity join 任意維度」這種真 BI 查詢；若日後出現此需求，必須走 ADR 升級
+- 跨 entity join 採「白名單巢狀路徑」實作（見下方「跨 entity join 規則」），不支援使用者自由 join 任意維度；真 BI 維度組合須走 ADR 升級
 - group-by 聚合不是 builder 內建，需開另一條 `/aggregate` endpoint（後續再做，MVP 不含）
 - 白名單必須隨 schema 演進維護；schema 漂移會讓 query 壞掉 → ArchUnit 加測試確保 entity 改欄位時 whitelist 同步
 
@@ -127,11 +127,38 @@
 4. 前端：列表頁的 filter UI 一律用 react-querybuilder 包裝（不要每個 feature 各自做 filter 元件）
 5. 前端：透過 RTK Query mutation 呼叫 `/queries/run`，response 走標準 Page 結構
 
-## 開放問題（決策前要確認）
+## 跨 entity join 規則（已決議）
 
-1. **跨 entity join 真的不需要嗎？** 確認後續 12 個區段是否真的沒有「合約 join 對手方 join 模板」這種跨表查詢需求
-2. **聚合需求**：Overview dashboard 的 stat card 數字怎麼來？走 query builder 還是各 module 自己出 endpoint？（建議後者，dashboard 不用 builder）
-3. **匯出**：Query 結果需要 CSV / Excel 匯出嗎？若需要，前端在 RTK Query 拿到 Page 後做？還是後端開 `/export` endpoint？
+支援「合約 join 對手方 join 模板」這類查詢，**但**僅限白名單明示的關聯路徑，不允許使用者自由 join。
+
+### 實作
+
+- RSQL 與 react-querybuilder 都支援以 dot 語法表達巢狀關聯：
+  - 範例：在 `Contract` entity 上查 `counterparty.name=='Acme';template.version=='v2'`
+  - `rsql-jpa-specification` 會自動產生對應的 JPA `Join`
+- 每個 `QueryableEntityConfig` 需聲明：
+  - `allowedNestedPaths`：哪些巢狀路徑被允許（e.g. `counterparty.name`、`template.version`），未列入 = 400
+  - `joinType`：預設 `INNER`；某些路徑可指定 `LEFT`（如選填關聯）
+  - 巢狀路徑的權限：被 join 進來的 entity 仍要套自己的行級權限 Specification（**多模組 Specification 由 `queries` 模組組合**）
+- 深度限制：**最多 2 層**（`a.b.c` 為上限），避免使用者組出爆炸查詢
+- N+1 防護：用到的巢狀路徑必須產生 `JOIN FETCH`（or `@EntityGraph`），ArchUnit 測試掃 SQL count
+
+### 前端
+
+react-querybuilder 的 fields 清單要支援 grouped fields（用 `optgroup` 分組），UX 上呈現為「Contract 欄位 / Counterparty 欄位 / Template 欄位」。
+
+## Overview dashboard 規則（已決議）
+
+Dashboard 的 stat card / 統計數字**不走 query builder**：
+
+- 每個 module 自行提供 `/api/v1/<module>/stats` endpoint
+- 回傳 DTO 為固定 schema（非動態），方便 cache 與 OpenAPI codegen
+- 後端可加 `@Cacheable`（Redis）降低 DB 壓力，TTL 由 module owner 決定
+- AI 在生成 dashboard 時：直接呼叫各 module stats endpoint，**禁止**呼叫 `/queries/run` 來算統計
+
+## 仍待釐清（不阻塞 MVP）
+
+3. **匯出**：Query 結果需要 CSV / Excel 匯出嗎？若需要，建議後端開 `/queries/export` 串流回 CSV（避免前端組大檔）
 4. **Saved Query 分享**：使用者可以分享自己的 saved query 給別人嗎？影響權限模型（owner-scoped → shared-with-roles）
 5. **是否要支援 full-text search？** Postgres 有 tsvector，要不要在白名單裡多一個 `_search` 偽欄位串接 tsquery？
 
