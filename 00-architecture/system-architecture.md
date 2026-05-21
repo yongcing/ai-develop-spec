@@ -2,20 +2,101 @@
 
 > 由架構師團隊維護。所有跨服務、跨層的設計決策來源。
 
-## 分層原則
+## 應用拓撲（總覽）
 
-待補：定義各層職責邊界、依賴方向、禁止的反向依賴。
+```
+┌────────────────────┐        ┌────────────────────┐
+│ Next.js 16 (App R) │        │  External IdP      │
+│  - RSC + Client    │◀─OIDC──│  (Keycloak/Auth0)  │
+│  - RTK Query       │        └────────────────────┘
+└────────┬───────────┘
+         │ HTTPS / REST + JWT
+         ▼
+┌────────────────────────────────────────────────────┐
+│ Spring Boot 3.3 Modular Monolith                   │
+│ ┌──────────┬──────────┬──────────┬──────────────┐  │
+│ │ contracts│ templates│ directory│ queries / …  │  │
+│ └────┬─────┴────┬─────┴────┬─────┴────┬─────────┘  │
+│      │ Spring Modulith 模組邊界           │           │
+│      ▼          ▼          ▼          ▼           │
+│   PostgreSQL  Redis    NATS JetStream  S3 (MinIO) │
+└────────────────────────────────────────────────────┘
+```
 
-建議採用 C4 model 描述：
-- Context：系統與外部使用者/系統的關係
-- Container：服務切分（前端、後端 API、worker、DB）
-- Component：每個 container 內的主要模組
-- Code：必要時才描述
+部署：單一 Spring Boot fat jar 進 K8s Deployment，多副本搭配 Shedlock 處理排程一致性。
+
+## 分層原則（前端 + 後端）
+
+### 後端（Spring Modulith）
+
+模組內維持三層：
+
+```
+controller  →  application service  →  domain  →  repository
+   (HTTP)        (use case / tx)        (核心模型)    (持久化)
+```
+
+- **依賴方向只能向下**：上層可呼叫下層，下層**不得**反向引用上層
+- **單一交易邊界**：service 層擁有 `@Transactional`；controller 與 repository 都不開交易
+- **DTO 不得跨層流通**：controller 用 web DTO；service 用 domain object；repository 回 entity。轉換在邊界
+- **跨模組溝通**：禁止跨模組 `@Autowired` 別人的 service；改走「published event（NATS）」或「同步呼叫對方公開的 module API（介面）」。ArchUnit 強制驗證。
+
+### 前端（Next.js feature-sliced）
+
+```
+src/
+├── app/             # 路由層（RSC，盡量無邏輯）
+├── features/<x>/    # 功能切片
+│   ├── components/  # feature 專用元件
+│   ├── hooks/       # 邏輯 hook（含 RTK Query 包裝）
+│   ├── api/         # RTK Query 與型別
+│   └── types/
+├── components/ui/   # 跨 feature 共用 UI 元件（自建）
+├── api/             # RTK Query baseApi、generated、extended
+├── store/           # Redux store 設定
+└── lib/             # 純工具函式（無 framework 依賴）
+```
+
+- **路由層不寫業務邏輯**：`app/` 內只做組合與 layout
+- **features 之間禁止相互 import**：要共用就上抽到 `components/ui/` 或 `lib/`
+- **單向依賴**：`app` → `features` → `components/ui` → `lib`；反向違規由 ESLint `eslint-plugin-boundaries` 或 `dependency-cruiser` 擋
 
 ## 服務切分原則
 
-待補：何時拆服務、何時合併、服務間溝通方式（同步 REST / 非同步事件）。
+預設**單體 (Modular Monolith)**，符合 [/30-backend/tech-stack.md](../30-backend/tech-stack.md)。
+
+### 何時保持單體
+
+- 團隊 < 30 人、單一部署單元仍可消化負載
+- 模組邊界靠 Spring Modulith + ArchUnit 維持，足以擋住耦合
+- 大部分本平台情境
+
+### 何時拆服務（須走 ADR）
+
+只在出現以下「強訊號」之一才考慮：
+
+1. **獨立擴展需求**：某模組需要與主體不同的副本數 / 資源規格（如 query/analytics 變重）
+2. **獨立發布節奏**：某模組需要與主體不同的部署頻率或停機窗
+3. **語言/runtime 需求衝突**：例如 ML 推論需 Python，無法塞進 Spring
+4. **法遵隔離**：資料需放不同網段 / 帳號
+5. **第三方整合的高失敗率**：對接外部不穩定服務時，隔離爆炸半徑
+
+不能用「微服務比較流行」「我覺得會變大」這種理由拆。
+
+### 服務間溝通
+
+- **同步**：REST + JWT（內部走 mTLS 或服務網格）；用 `@PreAuthorize` + service-to-service JWT 控制
+- **非同步**：NATS JetStream + CloudEvents 信封；訊息一律 at-least-once，consumer 必須冪等
+- **禁止**：跨服務直連對方資料庫；對方 DB 永遠透過對方 API
 
 ## 圖表
 
-放在 [diagrams/](diagrams/) 目錄，優先使用 mermaid 以利版控 diff。
+放在 [diagrams/](diagrams/) 目錄，優先 mermaid（PNG 只在 mermaid 無法表達時）。
+更新後在 PR description 貼新圖。
+
+## 對 AI 生成行為的影響
+
+- 後端：生成 controller / service / repository 必須三層分離；跨模組必走 events 或公開 API
+- 後端：禁止 controller 內加 `@Transactional`
+- 前端：features 間 import 必須被 ESLint 擋；發現要共用即抽到 `components/ui/`
+- 任何「拆服務」「合服務」「跨服務直連 DB」決定都要先有 ADR，AI 不得自行決定
