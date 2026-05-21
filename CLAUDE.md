@@ -10,11 +10,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 | 任務類型 | 必讀文件 |
 |---------|---------|
+| **任何指令執行前** | [00-architecture/local-toolchain.md](00-architecture/local-toolchain.md)（先確認本機 Node / JDK 版本對齊規格）|
 | 前端元件/頁面 | [20-frontend/tech-stack.md](20-frontend/tech-stack.md) + [20-frontend/ai-generation-rules.md](20-frontend/ai-generation-rules.md) |
-| 後端 API/服務 | [30-backend/tech-stack.md](30-backend/tech-stack.md) + [30-backend/ai-generation-rules.md](30-backend/ai-generation-rules.md) |
+| 後端 API/服務 | [30-backend/tech-stack.md](30-backend/tech-stack.md) + [30-backend/ai-generation-rules.md](30-backend/ai-generation-rules.md) + [00-architecture/api-contract-rules.md](00-architecture/api-contract-rules.md) |
 | 新增資料表/DB schema | [00-architecture/database-selection.md](00-architecture/database-selection.md) + 建立新 ADR |
 | 跨服務的架構變更 | [00-architecture/system-architecture.md](00-architecture/system-architecture.md) + 建立新 ADR |
-| UI prototype 落地 | [10-ux-design/design-principles.md](10-ux-design/design-principles.md) + [10-ux-design/design-tokens.json](10-ux-design/design-tokens.json) |
+| UI prototype 落地 | [10-ux-design/design-principles.md](10-ux-design/design-principles.md) + [10-ux-design/design-tokens.json](10-ux-design/design-tokens.json) + [10-ux-design/component-inventory.md](10-ux-design/component-inventory.md) |
+| 查詢／搜尋／篩選列表 | [00-architecture/adr/0002-query-builder.md](00-architecture/adr/0002-query-builder.md) |
 
 ## 硬規則（不可違反）
 
