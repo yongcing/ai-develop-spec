@@ -1,0 +1,26 @@
+{
+  "$schema": "https://design-tokens.org/schema.json",
+  "color": {
+    "primary": { "value": "#000000", "comment": "待 UX 定義" },
+    "background": { "value": "#FFFFFF" },
+    "text": { "value": "#111111" }
+  },
+  "spacing": {
+    "xs": { "value": "4px" },
+    "sm": { "value": "8px" },
+    "md": { "value": "16px" },
+    "lg": { "value": "24px" },
+    "xl": { "value": "32px" }
+  },
+  "typography": {
+    "fontFamily": { "value": "Inter, system-ui, sans-serif" },
+    "fontSize": {
+      "body": { "value": "16px" },
+      "heading": { "value": "24px" }
+    }
+  },
+  "radius": {
+    "sm": { "value": "4px" },
+    "md": { "value": "8px" }
+  }
+}

@@ -1,0 +1,10 @@
+# 各領域規格由對應專家 review
+# 將下方 @team 替換為實際 GitHub team 或 user
+
+/00-architecture/   @architect-team
+/10-ux-design/      @ux-team
+/20-frontend/       @frontend-leads
+/30-backend/        @backend-leads
+/40-quality-gates/  @architect-team @frontend-leads @backend-leads
+/prompts/           @architect-team
+/CLAUDE.md          @architect-team
