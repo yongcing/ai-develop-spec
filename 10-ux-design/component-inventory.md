@@ -2,7 +2,7 @@
 
 > AI 在生成 UI 前必須先查此清單，優先使用既有元件；缺項才新建並回填本表。
 >
-> 來源：`prototypes/V0_Covenant Data Platform.html` 抽取 + 後續實作補完。
+> 來源：各專案的 prototype（存於 project repo 的 `design/raw/`）+ 後續實作補完。
 > 實作位置：對應專案 repo 的 `src/components/ui/`（基於 Radix primitives + Tailwind 自建）。
 
 ## 基礎元件

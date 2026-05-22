@@ -67,7 +67,7 @@
   ```json
   {
     "specversion": "1.0",
-    "type": "com.covenant.contract.signed.v1",
+    "type": "com.example.contract.signed.v1",
     "source": "/contracts",
     "id": "uuid",
     "time": "2026-05-21T10:30:00Z",

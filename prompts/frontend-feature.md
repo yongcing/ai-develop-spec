@@ -19,7 +19,7 @@
 ## 需求
 
 - Feature 名稱：<填寫>
-- Prototype 路徑：<10-ux-design/prototypes/...>
+- Section spec 路徑：<project repo 的 `design/sections/<section-id>/`，含 visual/ + behavior/ + data/>
 - 使用情境：<user story>
 - API 來源：<OpenAPI endpoint 或 mock 規格>
 - 互動細節：<loading / error / empty 行為、optimistic update 等>

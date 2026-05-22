@@ -107,13 +107,15 @@
 
 ## Prototype 流程
 
-1. 使用 Claude Design / v0 生成 prototype
-2. 輸出存放至 [prototypes/](prototypes/)
-3. 抽取的 design tokens 更新到 [design-tokens.json](design-tokens.json)
-4. 更新 [component-inventory.md](component-inventory.md) 以反映 prototype 用到的新元件
-5. **每個 section 截圖 + 量測**：放到 `prototypes/screens/<section>.png` 與 `<section>.measurements.md`（細節見 [visual-parity-workflow.md](visual-parity-workflow.md)）
-6. 前端依 prototype + tokens 實作；不直接複製 prototype 的 HTML，要重新基於規範元件實作 — **但成品要與 prototype 視覺一致**（pixel diff < 2%，肉眼難以分辨）
-7. PR 必附 prototype vs 實作並排截圖，由 [/40-quality-gates/definition-of-done.md](../40-quality-gates/definition-of-done.md) 把關
+詳見 [/00-architecture/design-to-code-workflow.md](../00-architecture/design-to-code-workflow.md)（五階段、三份 spec、雙軌驗證）。
+此處只列與設計原則相關要點：
+
+1. 任何 prototype（v0、Claude Design、Figma、screenshot…）存到 **project repo** 的 `design/raw/`，不放 spec repo
+2. 抽取的 design tokens 更新到 [design-tokens.json](design-tokens.json)
+3. 更新 [component-inventory.md](component-inventory.md) 以反映 prototype 用到的新元件
+4. **每個 section 三份 spec**：`visual/`、`behavior/`、`data/` — 詳見 [visual-parity-workflow.md](visual-parity-workflow.md) 與 [interaction-spec-workflow.md](interaction-spec-workflow.md)
+5. 前端依 spec 實作；不直接複製 prototype 的 HTML，要重新基於規範元件實作 — **但成品要與 prototype 視覺一致**（pixel diff < 2%，肉眼難以分辨）
+6. PR 必附 prototype vs 實作並排截圖，由 [/40-quality-gates/definition-of-done.md](../40-quality-gates/definition-of-done.md) 把關
 
 ## 對 AI 生成行為的影響
 

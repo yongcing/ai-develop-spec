@@ -10,51 +10,34 @@
 
 ## 必要產出（每個區段一份）
 
-對 prototype 內每個區段（例如 Overview、My Contracts、Contract Detail…），規格庫必須有：
+對 prototype 內每個區段，**project repo** 必須有（路徑依 [/00-architecture/design-to-code-workflow.md](../00-architecture/design-to-code-workflow.md)）：
 
 ```
-prototypes/
-├─ <prototype-name>.html                  # 原始 prototype
-└─ screens/
-   └─ <prototype-name>/
-      ├─ overview.png                     # 1440x900 全頁截圖
-      ├─ overview.measurements.md         # 量出來的數字（見下）
-      ├─ my-contracts.png
-      ├─ my-contracts.measurements.md
-      └─ …
+design/sections/<section>/
+└─ visual/
+   ├─ default.png                # 1440×900 全頁截圖
+   ├─ measurements.md            # 量出來的數字（見下）
+   └─ states/
+      ├─ hover-<el>.png
+      ├─ empty.png
+      ├─ loading.png
+      └─ error.png
 ```
+
+原始 prototype 檔案放在 `design/raw/`，不放 spec repo。
 
 ### 截圖規格
 
 - viewport：**1440×900**（桌面主要斷點）
 - 全頁（含 scroll），不是 above-the-fold
 - 抓乾淨狀態（有資料），另抓 empty / error / loading 各一張到 `<section>.states/`
-- 用 Playwright 自動化：
+- 用 Playwright 自動化：[tools/capture-prototype-screens.ts](tools/capture-prototype-screens.ts) 是 config-driven 版本：
 
-```typescript
-// tools/capture-prototype-screens.ts
-import { chromium } from "playwright";
-
-const sections = [
-  { hash: "overview", name: "overview" },
-  { hash: "my-contracts", name: "my-contracts" },
-  // ...
-];
-
-(async () => {
-  const browser = await chromium.launch();
-  const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
-  await page.goto("file:///D:/SideProjects/ai-develop-spec/10-ux-design/prototypes/V0_Covenant%20Data%20Platform.html");
-  for (const s of sections) {
-    await page.locator(`[data-section="${s.hash}"]`).click();
-    await page.waitForTimeout(300);
-    await page.screenshot({ path: `screens/covenant/${s.name}.png`, fullPage: true });
-  }
-  await browser.close();
-})();
+```bash
+npx tsx 10-ux-design/tools/capture-prototype-screens.ts --config my-prototype.json
 ```
 
-放在 [tools/capture-prototype-screens.ts](tools/capture-prototype-screens.ts)；CI 每週重跑一次以偵測 prototype 漂移。
+config 格式見 [tools/capture.example.json](tools/capture.example.json)。CI 每週重跑一次以偵測 prototype 漂移。
 
 ### measurements.md 格式
 
@@ -103,14 +86,14 @@ const sections = [
 
 對每個 section：
 
-1. **截圖 + 量** — 完成 `screens/<section>.png` + `screens/<section>.measurements.md`
+1. **截圖 + 量** — 完成 `design/sections/<section>/visual/default.png` + `design/sections/<section>/visual/measurements.md`
 2. **元件盤點** — 對照 [component-inventory.md](component-inventory.md)，列出該 section 需要哪些 UI 元件；缺的先補（不要 inline 寫）
 3. **單頁實作** — 只實作這一個 section，**禁止**先抽 PageShell / DataTable 等共用層；除非 measurements 證明跨 section 結構一致
 4. **並排比對** — 開實作 dev server + prototype 同瀏覽器，1440x900 視窗左右各一，肉眼掃描差異；不合規的差異（見下）必須修
-5. **自動 diff** — 用 Playwright 對相同 URL 截圖，跟 `screens/<section>.png` 做 pixel diff；容忍門檻：總 diff pixels < 2% （字體 anti-aliasing 噪音）
+5. **自動 diff** — 用 Playwright 對相同 URL 截圖，跟 `design/sections/<section>/visual/default.png` 做 pixel diff；容忍門檻：總 diff pixels < 2% （字體 anti-aliasing 噪音）
 6. **抽共用**：兩個以上 section 重複的結構才能抽到 `components/ui/`，否則留在 feature 內
 
-> 違反順序會被 PR review 退回。AI 在做 UI section 時必須在 PR 描述貼 `screens/<section>.png` 並列當下實作截圖。
+> 違反順序會被 PR review 退回。AI 在做 UI section 時必須在 PR 描述貼 `design/sections/<section>/visual/default.png` 並列當下實作截圖。
 
 ## 「不合規差異」清單
 

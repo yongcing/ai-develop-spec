@@ -1,87 +1,87 @@
+// Generic prototype-screens capture script.
+//
+// Usage:
+//   npx tsx capture-prototype-screens.ts --config <config.json>
+//
+// Config schema (see capture.example.json next to this file):
+// {
+//   "prototypeUrl": "file:///abs/path/to/prototype.html"  // or any http(s) URL
+//   "outDir": "abs/path/to/output/screens",
+//   "viewport": { "width": 1440, "height": 900 },
+//   "navigation": [                                       // ordered steps
+//     { "name": "default" },                              // first snap, no click
+//     { "name": "after-foo", "clickText": "Foo" },
+//     { "name": "after-bar", "clickText": "Bar", "exact": false }
+//   ]
+// }
+//
+// Each step: optionally click an element by visible text, wait, screenshot.
+// Failures on a single step are reported and the script continues.
+
 import { chromium, type Page } from "playwright";
-import { mkdir } from "node:fs/promises";
-import { fileURLToPath } from "node:url";
-import { dirname, resolve } from "node:path";
+import { mkdir, readFile } from "node:fs/promises";
+import { resolve } from "node:path";
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const PROTOTYPE = resolve(__dirname, "../prototypes/V0_Covenant Data Platform.html");
-const OUT_DIR = resolve(__dirname, "../prototypes/screens/covenant");
+interface Step {
+  name: string;
+  clickText?: string;
+  exact?: boolean;
+  waitMs?: number;
+}
 
-async function snap(page: Page, name: string) {
-  await page.waitForTimeout(500);
-  await page.screenshot({ path: `${OUT_DIR}/${name}.png`, fullPage: true });
+interface Config {
+  prototypeUrl: string;
+  outDir: string;
+  viewport?: { width: number; height: number };
+  navigation: Step[];
+}
+
+async function snap(page: Page, outDir: string, name: string) {
+  await page.screenshot({ path: `${outDir}/${name}.png`, fullPage: true });
   console.log(`✓ ${name}.png`);
 }
 
-async function clickIfExists(page: Page, text: string): Promise<boolean> {
-  const loc = page.getByText(text, { exact: true }).first();
-  if ((await loc.count()) > 0) {
-    try {
-      await loc.click({ timeout: 3000 });
-      await page.waitForTimeout(500);
-      return true;
-    } catch {
-      return false;
-    }
-  }
-  return false;
-}
-
-async function pickRoleByPartial(page: Page, partial: string): Promise<boolean> {
-  // Role cards on login screen contain partial text — click the closest card-like container
-  const txt = page.getByText(partial, { exact: false }).first();
-  if ((await txt.count()) === 0) return false;
+async function tryClick(page: Page, text: string, exact = true) {
+  const loc = page.getByText(text, { exact }).first();
+  if ((await loc.count()) === 0) return false;
   try {
-    await txt.click({ timeout: 4000 });
-    await page.waitForTimeout(800);
+    await loc.click({ timeout: 3000 });
     return true;
   } catch {
     return false;
   }
 }
 
-(async () => {
-  await mkdir(OUT_DIR, { recursive: true });
+async function main() {
+  const i = process.argv.indexOf("--config");
+  if (i < 0 || !process.argv[i + 1]) {
+    console.error("Usage: capture-prototype-screens.ts --config <config.json>");
+    process.exit(2);
+  }
+  const cfgPath = resolve(process.argv[i + 1]!);
+  const cfg: Config = JSON.parse(await readFile(cfgPath, "utf8"));
+
+  await mkdir(cfg.outDir, { recursive: true });
   const browser = await chromium.launch();
-  const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
-  await page.goto(`file://${PROTOTYPE}`);
+  const page = await browser.newPage({ viewport: cfg.viewport ?? { width: 1440, height: 900 } });
+  await page.goto(cfg.prototypeUrl);
   await page.waitForLoadState("networkidle");
-  await page.waitForTimeout(1500);
+  await page.waitForTimeout(1200);
 
-  // Initial state IS provider workspace (per earlier capture). Snap it.
-  await snap(page, "provider-overview");
-  if (await clickIfExists(page, "我的合約")) await snap(page, "provider-my-contracts");
-  if (await clickIfExists(page, "註冊新合約")) await snap(page, "provider-register");
-  if (await clickIfExists(page, "草稿")) await snap(page, "provider-drafts");
-  if (await clickIfExists(page, "文件")) await snap(page, "provider-docs");
-
-  // Go to login (role switcher)
-  if (await clickIfExists(page, "切換身分")) {
-    await snap(page, "_login");
-
-    // Owner: text "平台管理者"
-    if (await pickRoleByPartial(page, "平台管理者")) {
-      await snap(page, "owner-overview");
-      for (const nav of ["待審核", "審核", "範本", "Templates", "儲存", "Storage", "目錄", "Directory", "瀏覽合約"]) {
-        if (await clickIfExists(page, nav)) {
-          await snap(page, `owner-${nav.toLowerCase().replace(/\s+/g, "-")}`);
-        }
-      }
+  for (const step of cfg.navigation) {
+    if (step.clickText) {
+      const ok = await tryClick(page, step.clickText, step.exact ?? true);
+      if (!ok) console.warn(`  ! click text "${step.clickText}" not found — snapping current state`);
     }
-
-    // Back to login → Consumer
-    if (await clickIfExists(page, "切換身分")) {
-      if (await pickRoleByPartial(page, "資料使用者")) {
-        await snap(page, "consumer-overview");
-        for (const nav of ["Query services", "Access tokens", "瀏覽合約"]) {
-          if (await clickIfExists(page, nav)) {
-            await snap(page, `consumer-${nav.toLowerCase().replace(/\s+/g, "-")}`);
-          }
-        }
-      }
-    }
+    await page.waitForTimeout(step.waitMs ?? 500);
+    await snap(page, cfg.outDir, step.name);
   }
 
   await browser.close();
-  console.log(`Done. Screens in ${OUT_DIR}`);
-})();
+  console.log(`Done. Screens in ${cfg.outDir}`);
+}
+
+main().catch((e) => {
+  console.error(e);
+  process.exit(1);
+});

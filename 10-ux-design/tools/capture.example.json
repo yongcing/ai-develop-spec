@@ -1,0 +1,10 @@
+{
+  "prototypeUrl": "file:///D:/path/to/your/prototype.html",
+  "outDir": "D:/path/to/design/sections/_captures",
+  "viewport": { "width": 1440, "height": 900 },
+  "navigation": [
+    { "name": "default" },
+    { "name": "after-login", "clickText": "Sign in" },
+    { "name": "dashboard-section", "clickText": "Dashboard", "exact": false, "waitMs": 600 }
+  ]
+}
