@@ -20,7 +20,7 @@ design/sections/<section>/
 
 ### 目的
 列出**每個可見的互動元素**及其 action / result。
-每條 row 將自動轉成一條 Playwright E2E。
+每條 row 將自動轉成一條 Cypress E2E（codegen 工具計劃中）。
 
 ### 模板
 
@@ -190,12 +190,17 @@ provider-my-contracts (with new pending row)
 
 `npm run lint:design-spec` 跑 [tools/lint-design-spec.mjs](tools/lint-design-spec.mjs)，檢查每個 `design/sections/<id>/`：
 
+實際由 [tools/lint-design-spec.mjs](tools/lint-design-spec.mjs) 強制：
+
 - [ ] `visual/default.png` 存在
 - [ ] `visual/measurements.md` 存在且非空
-- [ ] `behavior/interactions.md` 存在；為合法 markdown table；每條 row 引用的 `visual/states/*.png` 都存在；無 `TBD` / `待補` / `???`
+- [ ] `behavior/interactions.md` 存在且非空、含至少一個 markdown table（`|...|...|` 形式）、不含 `TBD` / `待補` / `???` / `TODO:`；引用 `visual/states/*.png` 的路徑都存在
 - [ ] `behavior/flow.md` 存在且非空
-- [ ] `data/contract.md` 存在且非空；含 `Source endpoints` / `Edge cases` / `Permissions` 三個 section
-- [ ] `visual/states/*.png` 都被 interactions.md 或 contract.md 引用（孤兒截圖警告）
+- [ ] `data/contract.md` 存在且非空；含 `Source endpoints` / `Edge cases` / `Permissions` 三個 heading；不含禁用 token
+- [ ] `visual/states/*.png` 都被 interactions.md 或 contract.md 引用（**未引用 = lint 失敗**，不是只警告）
+
+> State 欄合法寫法：`visual/states/<file>.png` 路徑，或文字標記 `(→ <section> section)` / `(no visual change)`。其他寫法（如 "shown above"）會通過 lint 但**不能 codegen E2E**。
+> 禁用 token 無 escape hatch：要保留待辦項目請從 spec 中移到 issue tracker。
 
 ### CI
 
@@ -210,23 +215,28 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: { node-version: '22' }
-      - run: node spec/10-ux-design/tools/lint-design-spec.mjs design/sections
+      - run: node <spec-submodule>/10-ux-design/tools/lint-design-spec.mjs design/sections
+        # 將 <spec-submodule> 換成你 project repo 內 ai-develop-spec 的 mount path（通常為 `spec/` 或 `vendor/spec/`）
 ```
 
 PR 紅 = 規格不全，無法進 Stage 3。
 
 ## E2E codegen
 
-`npm run codegen:e2e` 跑 [tools/codegen-e2e.mjs](tools/codegen-e2e.mjs)，每個 section 的 `interactions.md` 自動產一份 Playwright spec。產出的 test 落到 `tests/e2e/<section>.spec.ts`。
+> **狀態：計劃中**。`tools/codegen-e2e.mjs` 尚未實作；以下是 contract，project repo 可先依此自建。
+
+`npm run codegen:e2e` 跑 `tools/codegen-e2e.mjs`，每個 section 的 `interactions.md` 自動產一份 **Cypress** spec。產出的 test 落到 `cypress/e2e/<section>.cy.ts`。
+
+E2E 框架為 Cypress（見 [/20-frontend/tech-stack.md](../20-frontend/tech-stack.md)）。
 
 Codegen 規則：
-- 一條 row → 一個 `test()`
-- Selector 翻譯：`header button "X"` → `page.locator("header").getByRole("button", { name: "X" })`
-- Action 翻譯：見 row "Action" 欄詞彙
+- 一條 row → 一個 `it()`
+- Selector 翻譯：`header button "X"` → `cy.get("header").contains("button", "X")`
+- Action 翻譯：見 row "Action" 欄詞彙（`click | hover | focus | type | keydown:<key> | submit`）
 - Result 斷言：
-  - `navigate to /x` → `await expect(page).toHaveURL("/x")`
-  - `bg → neutral-50` → 對應 state 截圖 pixel diff
-  - `toast appears` → `await expect(page.getByRole("status")).toBeVisible()`
+  - `navigate to /x` → `cy.location("pathname").should("eq", "/x")`
+  - `bg → neutral-50` → 對應 state 截圖 pixel diff（透過 `cypress-image-snapshot`）
+  - `toast appears` → `cy.findByRole("status").should("be.visible")`
 
 人工可後續微調，但**第一版自動產生**。
 

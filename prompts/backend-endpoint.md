@@ -13,7 +13,10 @@
 3. [/30-backend/ai-generation-rules.md](../30-backend/ai-generation-rules.md)
 4. [/30-backend/layering-rules.md](../30-backend/layering-rules.md)
 5. [/30-backend/error-handling.md](../30-backend/error-handling.md)
-6. [/00-architecture/api-contract-rules.md](../00-architecture/api-contract-rules.md)
+6. [/30-backend/security-baseline.md](../30-backend/security-baseline.md)
+7. [/30-backend/coding-standards.md](../30-backend/coding-standards.md)
+8. [/00-architecture/api-contract-rules.md](../00-architecture/api-contract-rules.md)
+9. [/00-architecture/database-selection.md](../00-architecture/database-selection.md)（若涉及 DB schema）
 
 ## 需求
 
@@ -29,7 +32,7 @@
 - Controller + DTO（含 Bean Validation + OpenAPI 註解）
 - Service（含 `@Transactional`）
 - Repository（若需要）
-- Entity + Flyway migration（若涉及 DB 變更）
+- Entity + 對應 migration：JPA module 用 Flyway，Mongo module 用 Mongock（若涉及 DB 變更）
 - Unit test（Service）+ Integration test（Controller）
 - 更新 ArchUnit 測試（若引入新 package）
 

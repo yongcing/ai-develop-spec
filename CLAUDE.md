@@ -8,15 +8,17 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 在生成任何程式碼前，依任務類型讀取對應規格：
 
-| 任務類型 | 必讀文件 |
-|---------|---------|
-| **任何指令執行前** | [00-architecture/local-toolchain.md](00-architecture/local-toolchain.md)（先確認本機 Node / JDK 版本對齊規格）|
-| **任何 UI 任務（畫面、互動、表單、列表…）** | [00-architecture/design-to-code-workflow.md](00-architecture/design-to-code-workflow.md)（5 階段、三份 spec、雙軌驗證；缺料 hard-stop 不准擅自實作）|
-| 前端元件/頁面 | [20-frontend/tech-stack.md](20-frontend/tech-stack.md) + [20-frontend/ai-generation-rules.md](20-frontend/ai-generation-rules.md) |
-| 後端 API/服務 | [30-backend/tech-stack.md](30-backend/tech-stack.md) + [30-backend/ai-generation-rules.md](30-backend/ai-generation-rules.md) + [00-architecture/api-contract-rules.md](00-architecture/api-contract-rules.md) |
-| 新增資料表/DB schema | [00-architecture/database-selection.md](00-architecture/database-selection.md) + 建立新 ADR |
-| 跨服務的架構變更 | [00-architecture/system-architecture.md](00-architecture/system-architecture.md) + 建立新 ADR |
-| UI prototype 落地 | [10-ux-design/design-principles.md](10-ux-design/design-principles.md) + [10-ux-design/design-tokens.json](10-ux-design/design-tokens.json) + [10-ux-design/component-inventory.md](10-ux-design/component-inventory.md) + [10-ux-design/visual-parity-workflow.md](10-ux-design/visual-parity-workflow.md)（**強制**：每個 UI section 動工前先確認對應 `design/sections/<section>/visual/default.png` + `.measurements.md` 存在）|
+**Routing 規則**：每個 prompt 檔（`prompts/*.md`）已彙整該類型任務所有必讀規格。AI 接到任務應**直接讀對應 prompt**，prompt 會把你帶到所有必讀文件。
+
+| 任務類型 | 起點 prompt | 重要前置 |
+|---------|------------|---------|
+| **任何指令執行前** | — | [00-architecture/local-toolchain.md](00-architecture/local-toolchain.md)（先確認本機 Node / JDK 版本對齊規格）|
+| **任何 UI 任務（畫面、互動、表單、列表…）** | [prompts/frontend-feature.md](prompts/frontend-feature.md) | 動工前 hard-stop：依 [00-architecture/design-to-code-workflow.md](00-architecture/design-to-code-workflow.md) 確認 `design/sections/<section>/{visual,behavior,data}/` 三份 spec 存在 |
+| 前端元件 / 頁面 | [prompts/frontend-feature.md](prompts/frontend-feature.md) | |
+| 後端 API / 服務 | [prompts/backend-endpoint.md](prompts/backend-endpoint.md) | |
+| 全端 CRUD | [prompts/full-stack-crud.md](prompts/full-stack-crud.md) | |
+| 新增資料表 / DB schema | [prompts/backend-endpoint.md](prompts/backend-endpoint.md) + [00-architecture/database-selection.md](00-architecture/database-selection.md) | 建立新 ADR |
+| 跨服務的架構變更 | — | [00-architecture/system-architecture.md](00-architecture/system-architecture.md) + 建立新 ADR |
 
 ## 硬規則（不可違反）
 

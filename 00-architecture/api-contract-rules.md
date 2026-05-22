@@ -18,7 +18,7 @@
     "traceId": "..."
   }
   ```
-- **分頁**：query `page`（0-based）、`size`（預設 50、最大 200）；回傳 `Page<T>` 結構（`content`, `totalElements`, `totalPages`, `number`, `size`）
+- **分頁**：query `page`（0-based）、`size`（預設 50、最大 100）；回傳 `Page<T>` 結構（`content`, `totalElements`, `totalPages`, `number`, `size`）
 - **排序**：query `sort=field,asc`，可重複（白名單欄位才允許）
 - **時間**：一律 ISO-8601 UTC（`2026-05-21T10:30:00Z`），絕不傳本地時區字串
 - **金額**：字串 + 幣別碼（避免 float 精度），`{"amount": "1234.56", "currency": "TWD"}`
@@ -37,7 +37,7 @@
 ### Service-to-service 認證
 
 - **協定**：自簽 JWT（HMAC 或 RSA）+ `aud` 指明目標服務
-- **生命週期**：≤ 5 分鐘
+- **生命週期**：≤ 15 分鐘（與 [/30-backend/security-baseline.md](../30-backend/security-baseline.md) 一致）
 - **儲存**：密鑰放 K8s Secret，禁止寫入 repo
 
 ### 授權

@@ -26,8 +26,8 @@
 
 ## 交付物
 
-- Feature module 結構：`src/features/<name>/{components, hooks, api, types}`
-- TanStack Query hooks 處理 server state
+- Feature module 結構：`src/features/<name>/{components, hooks, schemas, types}`（**不**設 `api/`；RTK Query 集中放 `src/api/`）
+- Server state 一律走 RTK Query：使用 `@rtk-query/codegen-openapi` 生成的 `src/api/generated/` hooks（`useGetXxxQuery` / `useXxxMutation`），如需 transform 或 tag 在 `src/api/extended/` 包裝
 - Loading / error / empty 三狀態
 - 元件優先用 component-inventory 既有元件
 - Unit test（核心邏輯）+ component test（互動）

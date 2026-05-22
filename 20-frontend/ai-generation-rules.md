@@ -47,6 +47,8 @@
 - ❌ 手寫對應後端 schema 的 TS interface（必須來自 OpenAPI codegen）
 - ❌ 修改 `src/api/generated/` 內生成的檔案
 - ❌ 在 Redux store 存非序列化值（Date object、function、class instance）
+- ❌ **使用 TanStack Query (react-query) / SWR / Apollo Client / urql** — server state **只能**走 RTK Query；新增此類依賴需 ADR
+- ❌ 在 `features/<x>/` 內建 `api/` 子資料夾或自建 RTK Query slice — server state code **集中**於 `src/api/`
 
 ### 樣式
 - ❌ **寫死顏色 / 間距**：`bg-[#3366ff]`、`p-[13px]`、`text-[15px]`、`mt-[7px]` 一律禁止

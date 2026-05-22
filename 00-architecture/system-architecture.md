@@ -46,13 +46,13 @@ controller  →  application service  →  domain  →  repository
 ```
 src/
 ├── app/             # 路由層（RSC，盡量無邏輯）
-├── features/<x>/    # 功能切片
+├── features/<x>/    # 功能切片（不放 RTK Query；server state 一律從 src/api/ 取）
 │   ├── components/  # feature 專用元件
-│   ├── hooks/       # 邏輯 hook（含 RTK Query 包裝）
-│   ├── api/         # RTK Query 與型別
+│   ├── hooks/       # 邏輯 hook（不含 server-state hook；可包 RTK hook 加業務邏輯）
+│   ├── schemas/     # Zod / 驗證 schema
 │   └── types/
 ├── components/ui/   # 跨 feature 共用 UI 元件（自建）
-├── api/             # RTK Query baseApi、generated、extended
+├── api/             # **唯一** RTK Query 落點：baseApi、generated、extended
 ├── store/           # Redux store 設定
 └── lib/             # 純工具函式（無 framework 依賴）
 ```

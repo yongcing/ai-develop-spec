@@ -12,7 +12,7 @@
 
 ## 前端
 
-- [ ] `pnpm lint && pnpm typecheck && pnpm test` 全綠
+- [ ] `npm run lint && npm run typecheck && npm test` 全綠
 - [ ] Loading / error / empty 三狀態都有處理
 - [ ] a11y 基本檢查（鍵盤可達、語意化 HTML）
 - [ ] Responsive 在主要斷點檢查過
@@ -21,7 +21,7 @@
 
 ## 後端
 
-- [ ] `./gradlew check` 全綠（含 ArchUnit）
+- [ ] `./mvnw verify` 全綠（含 ArchUnit）
 - [ ] 新 endpoint 有 OpenAPI 註解
 - [ ] 新 endpoint 有 integration test
 - [ ] DB 變更有 Flyway migration
