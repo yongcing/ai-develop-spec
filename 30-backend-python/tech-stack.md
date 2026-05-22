@@ -13,7 +13,7 @@
 | Web framework | **FastAPI** (latest stable, ≥ 0.115) | async-first、自帶 OpenAPI 3.1 |
 | Validation / serialization | **Pydantic v2** | FastAPI 預設，request / response model |
 | ASGI server | **Uvicorn** (prod) / `fastapi dev` (local) | |
-| ORM（如需 DB） | **SQLAlchemy 2.x** (async) + **Alembic** | Mongo 場景另議走 ADR |
+| ORM（如需 DB） | **SQLAlchemy 2.x** (async) + **Alembic** | **僅 SQL DB**。Python service **禁用 MongoDB**（無 canonical migration tool；如需 Mongo 必走 ADR）。Java service 不受此限。 |
 | HTTP client | **httpx** (async) | 取代 requests；同時支援 sync / async |
 | 測試 | **pytest** + **pytest-asyncio** + **httpx** (TestClient) | |
 | Lint / format | **ruff**（取代 black / isort / flake8） | |

@@ -1,6 +1,6 @@
 # 後端語言選型決策（Java vs Python）
 
-> 本系統後端為多語言：Java（主幹）+ Python（特殊用途）。
+> 本系統後端為多語言：**Java 與 Python 依架構選型平等使用**。Java 在實務上是 modular monolith 的承載語言；Python 為按需新增的獨立服務。語言間無強制優先順序。
 > 「這個 component 用哪個語言」**由架構師決定**，並寫進該 component 的 README / ADR。
 > AI 拿到任務時，先看「component 已被標註為哪個語言」→ 讀取對應子目錄規範。
 
@@ -11,7 +11,7 @@
 | 預設 | **由架構師決定**，無自動預設 |
 | Java component 必讀 | [/30-backend/](.) + [/30-backend-java/](../30-backend-java/) |
 | Python component 必讀 | [/30-backend/](.) + [/30-backend-python/](../30-backend-python/) |
-| Python 部署模式 | **僅獨立服務**（不可嵌入 Java 主幹 JVM）|
+| Python 部署模式 | **僅獨立服務**（不可嵌入 JVM）|
 | 跨語言互動 | REST + JWT（同步）/ NATS + CloudEvents（非同步）|
 
 ## 架構師決策參考
@@ -26,7 +26,7 @@
 - **腳本 / batch / ETL**：以 Airflow / Prefect / Dagster 編排的批次工作
 - **快速 PoC / 實驗工具**：明確標記為非長期維運的試驗性 component
 
-### 適合採用 Java 的情境（本系統主幹）
+### 適合採用 Java 的情境
 
 - **核心交易邏輯**：強型別 + 大型 modular monolith + Spring 生態系
 - **JPA / Hibernate 交易保證**：複雜交易邊界
@@ -44,7 +44,7 @@
 
 ### Python = 獨立服務
 
-Python component **不可**塞進 Java 主幹的 JVM（runtime 不相容）。
+Python component **不可**塞進 JVM（runtime 不相容）。
 採用 Python 即觸發 [/00-architecture/system-architecture.md](../00-architecture/system-architecture.md) 的「拆服務」決策 — Python 服務獨立部署、獨立 K8s Deployment。
 
 ### 跨語言互動
@@ -74,5 +74,5 @@ AI 接到任務時讀這行 → 決定載入哪份 ai-generation-rules.md。
 - 開始 backend 任務前先確認 component README 標註 `Language`，否則停下回報
 - **Java component**：必讀 [/30-backend/](.) 全部 + [/30-backend-java/ai-generation-rules.md](../30-backend-java/ai-generation-rules.md)
 - **Python component**：必讀 [/30-backend/](.) 全部 + [/30-backend-python/ai-generation-rules.md](../30-backend-python/ai-generation-rules.md)
-- **不准跨語言實作同一個 component**（例：不能在 Java 主幹裡呼叫 Python script subprocess）— 要 Python 邏輯就拆服務
+- **不准跨語言實作同一個 component**（例：不能在 Java service 裡 spawn Python subprocess）— 要 Python 邏輯就拆獨立服務
 - **不准自行決定語言**：規格未指定時，視為缺料 hard stop

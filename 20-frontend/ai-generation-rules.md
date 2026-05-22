@@ -36,7 +36,7 @@
 ## 禁止 (MUST NOT)
 
 ### 型別
-- ❌ **`any`**（除非標註 `// ai-allow: any <具體理由>` 並由 reviewer 核可）
+- ❌ **`any`**（除非標註 `// ai-allow: any <具體理由>` 並由 CODEOWNERS 內 frontend tech-lead 簽 review）
 - ❌ **`as` type assertion 用於掃除編譯錯誤**（修型別、不要掩蓋；極少數合法情境須加註解說明）
 - ❌ `@ts-ignore` / `@ts-expect-error` 無說明
 - ❌ `unknown` 後不做 narrowing 直接使用

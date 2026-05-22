@@ -75,7 +75,7 @@ function use-jdk17 {
 - AI 執行 `mvn` 前若 `java --version` 不是 17.x，**先要求切換 JAVA_HOME**，不可繼續
 - 變更 `<maven.compiler.release>` 需 ADR
 
-## Python — 僅在 Python component 才需要
+## Python — Python component 必裝；Java-only project 可略
 
 詳見 [/30-backend-python/tech-stack.md](../30-backend-python/tech-stack.md)。
 

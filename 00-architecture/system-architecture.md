@@ -13,7 +13,7 @@
          │ HTTPS / REST + JWT
          ▼
 ┌────────────────────────────────────────────────────┐
-│ Java Modular Monolith (主幹)                       │
+│ Java Modular Monolith                              │
 │ Spring Boot 3.3 + Spring Modulith                  │
 │ ┌──────────┬──────────┬──────────┬──────────────┐  │
 │ │ module-a │ module-b │ module-c │ module-d / …│  │
@@ -32,7 +32,7 @@
 └─────────────────────────────────────────────────┘
 ```
 
-**主幹**：Java modular monolith — 單一 Spring Boot fat jar 進 K8s Deployment，多副本搭配 Shedlock 處理排程一致性。
+**Java service**：modular monolith — 單一 Spring Boot fat jar 進 K8s Deployment，多副本搭配 Shedlock 處理排程一致性。
 
 **Python services**：按需新增（ML / 資料 / Python-only 整合 / batch），**獨立 K8s Deployment**，**不**嵌入 JVM。語言選型決策見 [/30-backend/tech-decision.md](../30-backend/tech-decision.md)。
 
@@ -76,7 +76,7 @@ src/
 
 ## 服務切分原則
 
-**Java 主幹預設單體 (Modular Monolith)**，符合 [/30-backend-java/tech-stack.md](../30-backend-java/tech-stack.md)。Python component 採用本身即為「拆服務」決策，見 [/30-backend/tech-decision.md](../30-backend/tech-decision.md)。
+**Java service 預設單體 (Modular Monolith)**，符合 [/30-backend-java/tech-stack.md](../30-backend-java/tech-stack.md)。Python component 採用本身即為「拆服務」決策；語言選型 Java 與 Python 平等，見 [/30-backend/tech-decision.md](../30-backend/tech-decision.md)。
 
 ### 何時保持單體
 

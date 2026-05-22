@@ -29,9 +29,10 @@
 
 ### Java component 額外
 
-- [ ] `./mvnw verify` 全綠（含 ArchUnit）
+- [ ] `./mvnw verify` 全綠（含 ArchUnit、jacoco:check）
 - [ ] 新 package 加入 ArchUnit 規則
 - [ ] Spring Modulith `ApplicationModules.of(...).verify()` 過
+- [ ] JaCoCo 至少 70% line coverage
 
 ### Python component 額外
 

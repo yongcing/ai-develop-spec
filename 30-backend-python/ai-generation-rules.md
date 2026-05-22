@@ -45,7 +45,7 @@
 - ✅ Service unit test：mock repository
 - ✅ Endpoint integration test：用 `httpx.AsyncClient(transport=ASGITransport(app=app))` 或 `TestClient`
 - ✅ 每個 endpoint 至少：200 path + 一個 4xx path + 一個 5xx path（模擬下游失敗）
-- ✅ DB 整合：用 testcontainers-python 起 Postgres，**不**用 SQLite 替代
+- ✅ **所有外部 dependency 整合測試走 testcontainers-python**：Postgres / Redis / NATS / MinIO（Python service 禁用 Mongo，見 [tech-stack.md](tech-stack.md)）。禁止 fakeredis / SQLite 替代 Postgres / fake NATS / in-memory S3
 
 ### Async
 
@@ -70,7 +70,7 @@
 
 ### 型別
 
-- ❌ `Any`（除非標 `# ai-allow: any <理由>` 且 reviewer 簽）
+- ❌ `Any`（除非標 `# ai-allow: any <理由>` 且 CODEOWNERS 內 backend tech-lead 簽 review）
 - ❌ `cast(...)` 掩蓋型別錯誤
 - ❌ `# type: ignore` 沒理由
 

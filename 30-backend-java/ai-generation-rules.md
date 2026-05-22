@@ -92,5 +92,30 @@ com.<org>/
 
 ```bash
 ./mvnw verify
-# 包含：spotless:check、test、failsafe（integration test）、archunit、modulith verify
+# 包含：spotless:check、test、failsafe（integration test）、archunit、modulith verify、jacoco:check
+```
+
+**Coverage 門檻**：JaCoCo `jacoco:check` 至少 **70% line coverage**（與 Python 對齊）。在 `pom.xml` 設定：
+
+```xml
+<plugin>
+  <groupId>org.jacoco</groupId>
+  <artifactId>jacoco-maven-plugin</artifactId>
+  <executions>
+    <execution>
+      <id>check</id>
+      <goals><goal>check</goal></goals>
+      <configuration>
+        <rules>
+          <rule>
+            <element>BUNDLE</element>
+            <limits>
+              <limit><counter>LINE</counter><value>COVEREDRATIO</value><minimum>0.70</minimum></limit>
+            </limits>
+          </rule>
+        </rules>
+      </configuration>
+    </execution>
+  </executions>
+</plugin>
 ```

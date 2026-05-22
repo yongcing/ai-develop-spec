@@ -22,7 +22,7 @@
 - ✅ 所有參數 / class attribute 標型別
 - ✅ Generic 用 `TypeVar` / `Protocol`，**不**用 `Any` 規避
 - ✅ Optional 寫 `T | None`（PEP 604），不用 `Optional[T]`
-- ❌ `Any`（除非標 `# type: ignore[no-any-return] # justify reason`，PR review 過才允許）
+- ❌ `Any`（除非標 `# type: ignore[no-any-return] # justify reason`，且須 CODEOWNERS 內 backend tech-lead 簽 review 才允許）
 - ❌ `cast(...)` 掩蓋型別錯誤
 - ❌ `# type: ignore` 沒理由
 
