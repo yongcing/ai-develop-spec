@@ -46,11 +46,12 @@
 
 ## 完成前自檢
 
-對照 [/40-quality-gates/definition-of-done.md](../40-quality-gates/definition-of-done.md) 後端區塊逐項確認，並跑：
+1. 對照 [/40-quality-gates/definition-of-done.md](../40-quality-gates/definition-of-done.md) 後端區塊逐項確認
+2. 跑 [/30-backend-python/ai-generation-rules.md](../30-backend-python/ai-generation-rules.md) §「自動化檢查（CI 必過）」中的完整命令鏈（**該段為唯一權威清單**，本檔不重複）
+3. 最短驗證指令（locally 快速確認）：
 
 ```bash
-uv run ruff check && uv run ruff format --check
-uv run mypy --strict src/
-uv run lint-imports
-uv run pytest --cov=src --cov-fail-under=70
+uv run ruff check && uv run mypy --strict src/ && uv run pytest
 ```
+
+通過此短鏈不等於通過 CI；最終以 ai-generation-rules.md 列的完整鏈為準。

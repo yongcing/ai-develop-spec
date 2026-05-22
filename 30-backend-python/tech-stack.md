@@ -21,7 +21,7 @@
 | Tracing / logging | OpenTelemetry SDK + structlog | trace context 與 Java 共用 |
 | Auth (end-user) | **PyJWT** + cryptography | OIDC access token 驗證；`PyJWKClient` 抓 JWK Set 自動處理 rotation |
 | Auth (s2s) | FastAPI `HTTPBasic` + **passlib[bcrypt]** | HTTP Basic Auth；secret bcrypt-hashed 存 K8s Secret，見 [security-baseline.md](security-baseline.md) |
-| Background tasks（如需）| **Arq**（Redis-based）或 Celery（傳統需求）| 走 ADR |
+| Background tasks / scheduled jobs | **未釘**；需要時走 ADR 選定（候選：Arq / Celery / APScheduler） | spec repo 暫不提供 worker prompt；project 需要時先建 ADR + 自寫 prompt |
 
 ## 工具鏈
 
