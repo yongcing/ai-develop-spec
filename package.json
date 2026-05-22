@@ -4,7 +4,8 @@
   "description": "跨角色協作的 AI 開發規格中心。所有 AI 生成程式碼的規則、技術選型、架構決策都集中在此。",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node 10-ux-design/tools/lint-design-spec.test.mjs",
+    "lint:design-spec": "node 10-ux-design/tools/lint-design-spec.mjs"
   },
   "repository": {
     "type": "git",
