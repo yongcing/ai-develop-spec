@@ -55,7 +55,7 @@
 
 - 後端提供 OpenAPI 3 spec
 - 使用 **`@rtk-query/codegen-openapi`** 從 spec 自動產生 RTK Query API
-- 生成檔案放於 `src/api/generated/`，**禁止手改**
+- 生成檔案放於 `src/api/generated/<service-name>/`（一個 backend service 一個子資料夾，多 service 並存時禁止合併 spec），**禁止手改**
 - 如需擴充（cache、transformResponse）在 `src/api/extended/` 包裝
 
 ## 測試

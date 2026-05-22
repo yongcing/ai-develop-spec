@@ -51,7 +51,8 @@ controller/       →     domain/                 →     infrastructure/
 - **依賴方向只能向下**：上層可呼叫下層，下層**不得**反向引用上層
 - **單一交易邊界**：`domain/` 內 service 擁有 `@Transactional`；controller 與 repository 都不開交易
 - **DTO 不得跨層流通**：controller 用 web DTO；domain service 用 domain object；repository 回 entity。轉換在邊界
-- **跨模組溝通**：禁止跨模組 `@Autowired` 別人的 service；改走「published event（NATS）」或「目標模組 `domain/` 內以 `@NamedInterface` 標註的 SPI 介面」。ArchUnit 強制驗證。
+- **跨模組溝通**：禁止跨模組 `@Autowired` 別人的 service；改走「published event（NATS）」或「目標模組 `domain/` 內以 `@NamedInterface` 標註的 SPI 介面」。
+- **邊界 enforcement**：Java 用 **ArchUnit** + Spring Modulith `ApplicationModules.verify()`；Python service 用 **import-linter**（見 [/30-backend-python/layering-rules.md](../30-backend-python/layering-rules.md)）。
 
 ### 前端（Next.js feature-sliced）
 

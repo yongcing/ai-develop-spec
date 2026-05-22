@@ -16,11 +16,17 @@
 
 ### 2. Service-to-service 請求（內部服務、批次工具）
 
-- 機制：**自簽 JWT**
-- 簽章演算法：建議 RS256（公私鑰）；HS256 僅限完全內部、密鑰嚴格管控的情境
-- 必須包含 claim：`iss`、`aud`、`exp`（≤ 15 分鐘）、`sub`（呼叫者識別）
-- 驗證路徑：獨立 auth chain，僅作用於 `/api/v1/internal/**` 或標記為內部的 endpoint
-- 兩類認證**不共用** chain（防 token 誤用）
+- 機制：**HTTP Basic Auth**
+- 傳送：`Authorization: Basic base64(<service-id>:<secret>)`
+- **每個呼叫端一組 credentials**（service identity = username，secret 從 K8s Secret 注入）
+- 後端比對：username 找對應 secret（環境變數 / Secret manager），用 constant-time 比較
+- **URL path 釘定**：s2s endpoint **必須**位於 `/api/v1/internal/**` 之下（跨語言契約，讓 ingress / NetworkPolicy 可以用 path 規則統一阻擋外部流量）
+- 驗證路徑：獨立 auth chain，僅作用於 `/api/v1/internal/**`
+- **僅 admin / 內部工具用**：本路徑不暴露給一般 user；公網一律由 ingress 阻擋 `/api/v1/internal/**`
+- Credentials 輪換：每組 service credential ≤ 90 天輪換；輪換時 staged（先加新值並行，後刪舊值）
+- 兩類認證**不共用** chain（防 credentials 誤用）
+
+> **為何不 JWT？** 本系統 s2s 流量低、信任邊界清楚（內部 K8s NetworkPolicy）；Basic Auth 省去 token 簽章 / 過期 / refresh / library 維護的複雜度。若未來 s2s 規模 / 信任邊界改變，再走 ADR 升級為自簽 JWT。
 
 ## 授權
 
@@ -54,4 +60,6 @@ audit log 與一般 app log 分流（建議寫到獨立 logger / topic）。
 - ❌ 把 user input 直接拼進 SQL / OS command / file path
 - ❌ 回傳完整 stack trace 給 client
 - ❌ 不同認證機制共用同一 auth chain
-- ❌ JWT 簽章金鑰寫死或 commit 進 repo
+- ❌ JWT 簽章金鑰、Basic Auth secret 寫死或 commit 進 repo
+- ❌ s2s endpoint 暴露於 ingress（必須 NetworkPolicy / ingress rule 擋 `/api/v1/internal/**` 對外流量）
+- ❌ 用同一組 service credential 給多個呼叫端（每個呼叫端獨立帳號 → 可審計 + 可單獨輪換）

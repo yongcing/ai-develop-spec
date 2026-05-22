@@ -11,6 +11,7 @@
 - ✅ Package root：`src/<app_name>/`，PEP 621 layout（`pyproject.toml` + `src/` layout）
 - ✅ 每個 endpoint 必須在 `api/v1/routers/<resource>.py` 內，使用 `APIRouter`；不能放在 `main.py`
 - ✅ 所有 list endpoint 必須分頁（query `page`, `size` 預設 50、最大 100），對齊 [/00-architecture/api-contract-rules.md](../00-architecture/api-contract-rules.md)
+- ✅ List endpoint **response envelope** 必須與 Java 的 Spring Data `Page<T>` 對齊：`{content, totalElements, totalPages, number, size}`；自寫 `PageResponse[T]` Pydantic generic，**不可**用 `{items, total, ...}` 或其他變體
 
 ### 型別與 schema
 
@@ -18,12 +19,14 @@
 - ✅ Response model 用 `frozen=True` 設不可變
 - ✅ `mypy --strict` 全綠
 - ✅ 公開函式必有 `-> ReturnType` annotation
+- ✅ **Wire-casing**：所有面對外部的 Pydantic model 欄位 Python 端用 snake_case，序列化用 camelCase；統一以 `Field(..., alias="<camelCase>")` + `model_config = ConfigDict(populate_by_name=True)` + `model_dump(by_alias=True)` 三件套處理。例：`trace_id: str = Field(..., alias="traceId")`
 
 ### Auth / Security
 
-- ✅ Endpoint 預設要 auth（FastAPI dependency `Depends(require_auth)`）；公開 endpoint 在 `api/v1/public_routers.py` 明確列舉
+- ✅ Endpoint 預設要 auth（FastAPI dependency `Depends(require_end_user)` 或 `Depends(require_internal)`）；公開 endpoint 在 `api/v1/public_routers.py` 明確列舉
+- ✅ End-user 走 OIDC + JWT（**PyJWT**），s2s 走 HTTP Basic Auth + passlib bcrypt（見 [security-baseline.md](security-baseline.md)）
 - ✅ Service 層做 owner check：`if order.owner_id != current_user.id: raise ForbiddenError(...)`
-- ✅ Service-to-service JWT 走獨立 auth chain（不同 FastAPI app instance 或 router-level dependency）
+- ✅ s2s endpoint 一律掛在 `/api/v1/internal/**` prefix
 
 ### Error handling
 

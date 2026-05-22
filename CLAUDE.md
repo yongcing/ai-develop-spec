@@ -10,7 +10,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 在生成任何程式碼前，依任務類型讀取對應規格：
 
-**Routing 規則**：每個 prompt 檔（`prompts/*.md`）已彙整該類型任務所有必讀規格。AI 接到任務應**直接讀對應 prompt**，prompt 會把你帶到所有必讀文件。
+**Routing 規則**：每個 prompt 檔（`prompts/*.md`）已彙整該類型任務所有必讀規格。AI 接到任務應**直接讀對應 prompt**，prompt 會把你帶到所有必讀文件。下表為任務 → prompt 對照；下半段「直接查詢索引」給「我要看某個主題的權威 spec」的場景。
+
+### 任務路由
 
 | 任務類型 | 起點 prompt | 重要前置 |
 |---------|------------|---------|
@@ -23,6 +25,20 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 | 全端 CRUD | [prompts/full-stack-crud.md](prompts/full-stack-crud.md) | |
 | 新增資料表 / DB schema | 對應語言 backend prompt + [00-architecture/database-selection.md](00-architecture/database-selection.md) | 建立新 ADR |
 | 跨服務的架構變更 | — | [00-architecture/system-architecture.md](00-architecture/system-architecture.md) + 建立新 ADR |
+
+### 直接查詢索引（找特定主題的權威 spec）
+
+| 主題 | 權威文件 |
+|------|---------|
+| REST 契約 / 命名 / 分頁 envelope / wire JSON casing | [00-architecture/api-contract-rules.md](00-architecture/api-contract-rules.md) |
+| 錯誤格式（RFC 7807 / Problem Details） | shared: [30-backend/error-handling.md](30-backend/error-handling.md)；Java: [30-backend-java/error-handling.md](30-backend-java/error-handling.md)；Python: [30-backend-python/error-handling.md](30-backend-python/error-handling.md) |
+| 認證 / 授權 / s2s Basic Auth / secrets | shared: [30-backend/security-baseline.md](30-backend/security-baseline.md)；Java: [30-backend-java/security-baseline.md](30-backend-java/security-baseline.md)；Python: [30-backend-python/security-baseline.md](30-backend-python/security-baseline.md) |
+| 後端分層 / package 結構 | Java: [30-backend-java/layering-rules.md](30-backend-java/layering-rules.md)；Python: [30-backend-python/layering-rules.md](30-backend-python/layering-rules.md) |
+| 命名 / 編碼規約 | Java: [30-backend-java/coding-standards.md](30-backend-java/coding-standards.md)；Python: [30-backend-python/coding-standards.md](30-backend-python/coding-standards.md) |
+| 前端編碼規約 | [20-frontend/coding-standards.md](20-frontend/coding-standards.md) |
+| DB 選型 / migration | [00-architecture/database-selection.md](00-architecture/database-selection.md) |
+| 設計 → 程式碼工作流（含 wave 規範） | [00-architecture/design-to-code-workflow.md](00-architecture/design-to-code-workflow.md) |
+| Visual / Interaction / Data spec | [10-ux-design/visual-parity-workflow.md](10-ux-design/visual-parity-workflow.md)、[10-ux-design/interaction-spec-workflow.md](10-ux-design/interaction-spec-workflow.md) |
 
 ## 硬規則（不可違反）
 

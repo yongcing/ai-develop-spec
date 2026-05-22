@@ -36,7 +36,8 @@
 }
 ```
 
-- `type` 必填，URI 字串，每個 problem 一個唯一值（不必能解析）
+- `type` 必填，**URI 模式釘定**為 `https://api.example.com/problems/<kebab-semantic>`（不必真能解析，但 stem 必須對齊）
+- Media type：`application/problem+json`
 - `title` 必填，人類可讀短句
 - `status` 必填，整數 HTTP status
 - `detail`、`instance` 建議填

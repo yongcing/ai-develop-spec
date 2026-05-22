@@ -19,7 +19,8 @@
 | Lint / format | **ruff**（取代 black / isort / flake8） | |
 | Type check | **mypy --strict** | CI 必過 |
 | Tracing / logging | OpenTelemetry SDK + structlog | trace context 與 Java 共用 |
-| Auth | python-jose + cryptography（JWT 驗證）| 自簽 service token 用 `jose.jwt.encode` |
+| Auth (end-user) | **PyJWT** + cryptography | OIDC access token 驗證；`PyJWKClient` 抓 JWK Set 自動處理 rotation |
+| Auth (s2s) | FastAPI `HTTPBasic` + **passlib[bcrypt]** | HTTP Basic Auth；secret bcrypt-hashed 存 K8s Secret，見 [security-baseline.md](security-baseline.md) |
 | Background tasks（如需）| **Arq**（Redis-based）或 Celery（傳統需求）| 走 ADR |
 
 ## 工具鏈
@@ -61,7 +62,8 @@ uv run fastapi dev app/main.py # 本機開發
 |------|---------|------------|
 | REST | [/00-architecture/api-contract-rules.md](../00-architecture/api-contract-rules.md) | FastAPI（自動 OpenAPI） |
 | Error format | [/30-backend/error-handling.md](../30-backend/error-handling.md) | 自建 Problem Details middleware |
-| JWT auth | [/30-backend/security-baseline.md](../30-backend/security-baseline.md) | `python-jose` + FastAPI dependency |
+| End-user JWT auth | [/30-backend/security-baseline.md](../30-backend/security-baseline.md) | **PyJWT** + FastAPI dependency |
+| s2s auth | [/30-backend/security-baseline.md](../30-backend/security-baseline.md) | FastAPI `HTTPBasic` + `passlib[bcrypt]` |
 | Events | [/00-architecture/api-contract-rules.md](../00-architecture/api-contract-rules.md) | `nats-py` + `cloudevents` SDK |
 
 ## 對 AI 生成行為的影響

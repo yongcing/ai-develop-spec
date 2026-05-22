@@ -8,9 +8,11 @@
 - **冪等**：GET、PUT、DELETE 必須冪等；POST 不保證
 - **狀態碼**：200 / 201 / 204 / 400 / 401 / 403 / 404 / 409（衝突）/ 422（語意錯誤）/ 429（rate limit）/ 5xx
 - **錯誤格式**：[RFC 7807 Problem Details](https://datatracker.ietf.org/doc/html/rfc7807)
+  - `type` URI 模式釘定：`https://api.example.com/problems/<kebab-semantic>`（例：`/problems/not-found`、`/problems/validation`）
+  - Media type：`application/problem+json`
   ```json
   {
-    "type": "https://api.example.com/errors/contract-not-found",
+    "type": "https://api.example.com/problems/not-found",
     "title": "Contract not found",
     "status": 404,
     "detail": "Contract id=abc123 does not exist",
@@ -18,10 +20,25 @@
     "traceId": "..."
   }
   ```
-- **分頁**：query `page`（0-based）、`size`（預設 50、最大 100）；回傳 `Page<T>` 結構（`content`, `totalElements`, `totalPages`, `number`, `size`）
+- **分頁**：
+  - Query：`page`（0-based）、`size`（預設 50、最大 100）
+  - Response envelope（**跨語言一致**）：
+    ```json
+    {
+      "content": [ /* items */ ],
+      "totalElements": 137,
+      "totalPages": 3,
+      "number": 0,
+      "size": 50
+    }
+    ```
+  - Java 用 Spring Data `Page<T>` 自動產這個 shape；**Python** 需自寫 Pydantic `PageResponse[T]` 對齊（不可改欄位名）
 - **排序**：query `sort=field,asc`，可重複（白名單欄位才允許）
 - **時間**：一律 ISO-8601 UTC（`2026-05-21T10:30:00Z`），絕不傳本地時區字串
 - **金額**：字串 + 幣別碼（避免 float 精度），`{"amount": "1234.56", "currency": "TWD"}`
+- **欄位命名**（**跨語言契約**）：所有 wire JSON 欄位一律 **camelCase**（`traceId` / `totalElements` / `createdAt` …）。
+  - Java：record / DTO 直接命名 camelCase，Jackson 預設
+  - Python：Pydantic model 內部用 snake_case，**必須**透過 `Field(..., alias="<camelCase>")` + `model_config = ConfigDict(populate_by_name=True)`，序列化用 `model_dump(by_alias=True)`
 
 ## 認證 / 授權
 
@@ -51,7 +68,7 @@
 - **產生**：後端自動產 OpenAPI 3.1 spec（Java: springdoc-openapi；Python: FastAPI 內建 `/openapi.json`）
 - **位置**：runtime exposes `/v3/api-docs`；build 時匯出為 `docs/openapi.json` 入 repo
 - **校驗**：CI 驗 spec lint（spectral）
-- **前端**：用 `@rtk-query/codegen-openapi` 從匯出的 spec 自動產生 RTK Query API；生成檔放 `src/api/generated/`，禁止手改
+- **前端**：用 `@rtk-query/codegen-openapi` 從匯出的 spec 自動產生 RTK Query API；生成檔放 `src/api/generated/<service-name>/`（**一個 backend service 一個子資料夾**，多 service 場景禁止合併 spec），禁止手改
 - **註解**：每個 endpoint 必須有完整 metadata：
   - Java: `@Operation(summary=…)`、`@ApiResponse(...)` 完整、DTO 有 `@Schema`
   - Python: FastAPI decorator 帶 `summary`、`response_model`、`responses={...}`；Pydantic `Field(..., description="...", examples=[...])`
