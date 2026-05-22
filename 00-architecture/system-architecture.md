@@ -29,17 +29,18 @@
 
 ### 後端（Spring Modulith）
 
-模組內維持三層：
+模組內維持三層（詳見 [/30-backend/layering-rules.md](../30-backend/layering-rules.md)）：
 
 ```
-controller  →  application service  →  domain  →  repository
-   (HTTP)        (use case / tx)        (核心模型)    (持久化)
+controller/       →     domain/                 →     infrastructure/
+(HTTP + DTO)            (service + business              (Repository + Entity
+                         logic + tx 邊界)                  + 外部整合)
 ```
 
 - **依賴方向只能向下**：上層可呼叫下層，下層**不得**反向引用上層
-- **單一交易邊界**：service 層擁有 `@Transactional`；controller 與 repository 都不開交易
-- **DTO 不得跨層流通**：controller 用 web DTO；service 用 domain object；repository 回 entity。轉換在邊界
-- **跨模組溝通**：禁止跨模組 `@Autowired` 別人的 service；改走「published event（NATS）」或「同步呼叫對方公開的 module API（介面）」。ArchUnit 強制驗證。
+- **單一交易邊界**：`domain/` 內 service 擁有 `@Transactional`；controller 與 repository 都不開交易
+- **DTO 不得跨層流通**：controller 用 web DTO；domain service 用 domain object；repository 回 entity。轉換在邊界
+- **跨模組溝通**：禁止跨模組 `@Autowired` 別人的 service；改走「published event（NATS）」或「目標模組 `domain/` 內以 `@NamedInterface` 標註的 SPI 介面」。ArchUnit 強制驗證。
 
 ### 前端（Next.js feature-sliced）
 

@@ -9,7 +9,7 @@
 | 實作類 | 具體命名優先；單一實作可加 `Impl` | `JpaOrderRepository` 或 `OrderServiceImpl` |
 | Method / 變數 | camelCase | `createOrder`, `orderId` |
 | 常數 | UPPER_SNAKE_CASE | `MAX_PAGE_SIZE` |
-| Package | 全小寫，無底線 | `com.company.app.order.domain` |
+| Package | 全小寫，無底線 | `com.<org>.order.domain` |
 | 測試 class | `<被測類>Test` / `<被測類>IT` | `OrderServiceTest`, `OrderControllerIT` |
 
 ## DTO / Entity / Mapper

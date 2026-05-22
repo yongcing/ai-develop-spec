@@ -1,9 +1,9 @@
 {
   "$schema": "https://design-tokens.org/schema.json",
-  "$source": "Extracted from prototypes/V0_Covenant Data Platform.html (verified 2026-05-22 from rendered DOM)",
+  "$source": "Illustrative defaults; project repos override via their own design tokens",
   "color": {
     "brand": {
-      "primary": { "value": "#0f3d2e", "comment": "Primary CTA / brand mark — dark forest green. NOT Apple blue." },
+      "primary": { "value": "#0f3d2e", "comment": "Primary CTA / brand mark" },
       "primaryHover": { "value": "#0c3225" },
       "primaryText": { "value": "#ffffff" },
       "accent": { "value": "#5856d6", "comment": "Reserved — currently unused in prototype" }

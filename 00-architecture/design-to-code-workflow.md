@@ -94,16 +94,18 @@ design/sections/<section>/
 
 ### `visual/measurements.md`
 
+> **以下是格式範例**，具體數值依各 project 量測為準（沒有 spec repo 強制的「official」數值）。**顏色一律寫 token name，不准 hex**。
+
 ```markdown
 ## Layout
 - Content max-width / padding / grid gap
 ## Typography
 - Page title / card title / body / meta — 字級、字重、line-height
 ## Specific components
-- StatCard: padding 20px 24px, label 11px uppercase #6e6e73, value 32px 600
-- DataTable: row height 64px, header text-xxs uppercase, divider 1px neutral-100
+- StatCard: padding <px> <px>, label text-xxs uppercase color.neutral.700, value text-3xl font-semibold
+- DataTable: row height <px>, header text-xxs uppercase, divider 1px color.border.subtle
 ## Color usage
-- 全部從 design-tokens.json 引用；不准 hardcode
+- 全部從 design-tokens.json 引用；不准 hardcode hex / rgb / hsl
 ```
 
 實測值，不要憑感覺。用瀏覽器 DevTools 量。

@@ -1,5 +1,9 @@
 # ADR-0000: <決策標題>
 
+> **檔名規範**：`<4 位編號>-<kebab-case-簡述>.md`，例如 `0003-event-bus-choice.md`。
+> 編號由下一個未使用值起算（看 `00-architecture/adr/` 既有最大值）。
+> 不要用 `01`、`001`、`adr-3` 等變體。
+
 - 狀態：Proposed | Accepted | Superseded by ADR-XXXX
 - 日期：YYYY-MM-DD
 - 決策者：

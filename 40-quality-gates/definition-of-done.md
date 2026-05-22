@@ -24,7 +24,7 @@
 - [ ] `./mvnw verify` 全綠（含 ArchUnit）
 - [ ] 新 endpoint 有 OpenAPI 註解
 - [ ] 新 endpoint 有 integration test
-- [ ] DB 變更有 Flyway migration
+- [ ] DB schema 變更有對應 migration（JPA module → Flyway；Mongo module → Mongock）
 - [ ] 錯誤回應符合 Problem Details 格式
 
 ## 架構/規格變更

@@ -6,7 +6,7 @@
 ## 必須 (MUST)
 
 ### 結構與分層
-- ✅ 採 **Spring Modulith** 模組結構：`com.company.<module>.{api, domain, infrastructure}`
+- ✅ 採 **Spring Modulith** 模組結構：`com.<org>.<module>.{controller, domain, infrastructure}`（package root 不含 `.app`）
 - ✅ 模組間**僅能透過 public API package 或 Spring Modulith ApplicationEvents 互動**，禁止跨模組直接 import internal class
 - ✅ 嚴格分層：Controller → Service → Repository。Controller 不得呼叫 Repository
 - ✅ Controller 只處理 HTTP 與 input validation，業務邏輯一律在 Service
@@ -73,18 +73,20 @@
 ## 套件結構（Spring Modulith）
 
 ```
-com.company.app/
+com.<org>/
 ├── <module-a>/
 │   ├── package-info.java          # @ApplicationModule 宣告
-│   ├── api/                       # 公開：DTO、對外介面、events
-│   ├── domain/                    # 內部：Service、business logic
-│   ├── infrastructure/            # 內部：Repository、Entity、外部整合
+│   ├── controller/                # HTTP 層：Controller + Request/Response DTO + OpenAPI 註解
+│   ├── domain/                    # 業務層：Service、business logic、domain event、跨模組 SPI interface（@NamedInterface）
+│   ├── infrastructure/            # 持久化 + 外部整合：Repository、Entity、外部 client
 │   └── config/                    # 該模組的 @Configuration
 ├── <module-b>/
 │   └── ...
 ├── shared/                        # 跨模組共用的純技術型工具（無業務邏輯）
 └── AppApplication.java
 ```
+
+跨模組溝通：對外介面（SPI interface、發布的 event 型別）放在 `domain/`，用 Spring Modulith `@org.springframework.modulith.NamedInterface` 標註讓 ArchUnit 認得是公開介面。
 
 ## 自動化檢查（CI 必過）
 

@@ -5,53 +5,51 @@
 ## 模組層級
 
 ```
-┌─────────────────────────────────────────────┐
-│  Module A         Module B        Module C  │
-│  ┌─────┐         ┌─────┐         ┌─────┐    │
-│  │ api │ ──→ 公開介面/事件 ←── │ api │     │
-│  └─────┘         └─────┘         └─────┘    │
-│  ┌─────────┐    ┌─────────┐    ┌─────────┐  │
-│  │ domain  │    │ domain  │    │ domain  │  │
-│  └─────────┘    └─────────┘    └─────────┘  │
-│  ┌──────────┐   ┌──────────┐   ┌──────────┐ │
-│  │ infra    │   │ infra    │   │ infra    │ │
-│  └──────────┘   └──────────┘   └──────────┘ │
-└─────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────┐
+│  Module A           Module B            Module C         │
+│                                                          │
+│  controller/        controller/         controller/      │
+│      ↓                  ↓                   ↓            │
+│  domain/  ──→ NamedInterface ←──  domain/  ──→  ...      │
+│      ↓                  ↓                   ↓            │
+│  infrastructure/    infrastructure/     infrastructure/  │
+└──────────────────────────────────────────────────────────┘
 ```
 
 ### 模組規則
 
 - 每個模組以 `package-info.java` 標註 `@ApplicationModule`
-- 模組 `api/` 為唯一對外入口（DTO、SPI 介面、發布的 events）
-- `domain/` 與 `infrastructure/` 對其他模組**不可見**
+- 跨模組可見的介面 / 事件型別 = 在 `domain/` 內標 Spring Modulith `@NamedInterface`，其他都視為 module-private
+- `controller/`、`infrastructure/` 對其他模組**永遠不可見**
 - 跨模組溝通優先順序：
   1. **ApplicationEvents（最佳）**：解耦、可測、可改非同步
-  2. **公開 SPI 介面**：在 `api/` 定義 interface，目標模組實作並由 Spring 注入
-  3. **直接呼叫 api/ 中的 service**：可，但會增加耦合
+  2. **`@NamedInterface` SPI**：在 `domain/` 定義 interface 並標註 NamedInterface，目標模組實作並由 Spring 注入
+  3. **直接呼叫 NamedInterface 中的 service**：可，但會增加耦合
 
 ## 模組內三層
 
 ```
-api/  (Controller + DTO + 對外 event/SPI)
+controller/  (Controller + Request/Response DTO + OpenAPI 註解)
    ↓ 只能呼叫
-domain/  (Service + business logic + domain event)
+domain/  (Service + business logic + domain event + 對外 NamedInterface)
    ↓ 只能呼叫
 infrastructure/  (Repository + Entity + 外部整合)
 ```
 
-### Controller (api/)
-- HTTP 處理、DTO ↔ domain 轉換、Bean Validation、`@PreAuthorize`
+### Controller (`controller/`)
+- HTTP 處理、DTO ↔ domain 轉換、Bean Validation、`@PreAuthorize`、`@Operation` / `@ApiResponse`
 - **禁止**：業務邏輯、直接存取 Repository、try-catch domain exception
+- DTO：Request / Response 都是 **record**，位於 `controller/` package 內
 
-### Service (domain/)
+### Service (`domain/`)
 - 業務邏輯、編排
 - **Transaction 邊界**：`@Transactional`（讀用 `readOnly = true`）
-- 跨模組互動透過注入的 SPI 介面或發布 events
-- **禁止**：依賴 web 層型別、依賴其他模組的 internal class
+- 跨模組互動透過注入的 `@NamedInterface` 介面或發布 events
+- **禁止**：依賴 web 層型別（DTO、HttpServletRequest…）、依賴其他模組的 internal class
 
-### Repository / Infrastructure (infrastructure/)
+### Repository / Infrastructure (`infrastructure/`)
 - JPA Repository / MongoDB Repository / 外部 client
-- Entity 定義
+- Entity 定義（`@Entity` / `@Document`）
 - **禁止**：業務邏輯
 
 ## DTO / Entity 邊界
@@ -79,7 +77,7 @@ void writesDocumentation() {
 ```
 
 並補上 ArchUnit 規則：
-- Controller 只能在 `api` package
+- `@RestController` / `@Controller` 只能在 `controller` package
 - `@Entity` / `@Document` 只能在 `infrastructure` package
 - `*Repository` 只能被 `domain` package import
-- 跨模組 import 必須以對方的 `api` 為起點
+- 跨模組 import 只允許指向對方 `domain` 內以 `@NamedInterface` 標註的型別；嚴禁指向 `controller` / `infrastructure`

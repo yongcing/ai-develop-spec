@@ -215,8 +215,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: { node-version: '22' }
-      - run: node <spec-submodule>/10-ux-design/tools/lint-design-spec.mjs design/sections
-        # 將 <spec-submodule> 換成你 project repo 內 ai-develop-spec 的 mount path（通常為 `spec/` 或 `vendor/spec/`）
+      - run: node spec/10-ux-design/tools/lint-design-spec.mjs design/sections
+        # `spec/` 是 ai-develop-spec submodule 的釘定 mount path（見 spec README）
 ```
 
 PR 紅 = 規格不全，無法進 Stage 3。

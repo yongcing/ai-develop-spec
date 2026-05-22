@@ -19,7 +19,9 @@
 ## 使用方式
 
 1. 各專案 repo 將本 repo 作為 git submodule 引入並釘版本
-2. AI 在生成程式碼前讀取對應領域的 `tech-stack.md` 與 `ai-generation-rules.md`
+   - **Mount path 釘定為 `spec/`**：`git submodule add https://github.com/yongcing/ai-develop-spec.git spec`
+   - 所有 CI 腳本、`lint:design-spec` 呼叫、文件交叉連結都假設此路徑
+2. AI 在生成程式碼前讀取 `spec/CLAUDE.md`（路由表）→ 對應任務的 `prompts/<task>.md` → prompt 列出所有必讀 spec
 3. 規格變更走 PR，由 CODEOWNERS 對應領域負責人 review
 
 ## 目錄結構

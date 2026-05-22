@@ -48,7 +48,7 @@
 | 非文字元件（icon、border、focus ring）| 3:1 | |
 | Disabled 元素 | 不要求，但**禁止**僅靠灰色傳達 disabled，必須有第二訊號（icon / cursor / aria-disabled）|
 
-設計 tokens 內所有「文字 on 背景」組合都要過 4.5:1（CI 用 [color-contrast-checker](https://www.npmjs.com/package/color-contrast-checker) 跑）。
+設計 tokens 內所有「文字 on 背景」組合都要過 4.5:1。**Project repo** 需在 CI 加 contrast 檢查（例如 npm 套件 [color-contrast-checker](https://www.npmjs.com/package/color-contrast-checker)；spec repo 目前未提供 ready-made 腳本）。
 
 ### 鍵盤
 

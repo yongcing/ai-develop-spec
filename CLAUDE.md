@@ -4,6 +4,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 本 repo 是「規格中心」，不存放任何可執行程式碼。實際的程式碼存在於各專案 repo，這些 repo 透過 git submodule 引用本 repo 作為其 AI 開發規範來源。
 
+**Submodule mount path 釘定為 `spec/`**。所有 CI 腳本與 lint 工具呼叫路徑都假設此位置。Project repo 加 submodule 時：`git submodule add <url> spec`。
+
 ## AI 任務路由
 
 在生成任何程式碼前，依任務類型讀取對應規格：

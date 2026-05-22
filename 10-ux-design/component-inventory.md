@@ -55,7 +55,6 @@
 | ContractStatusBadge | contracts | 包裝 Badge，對應合約狀態列舉 |
 | TemplatePicker | templates | 模板選擇 dialog |
 | PartySelector | directory | counterparty 多選 |
-| QueryBuilder | queries | 非平凡，需單獨設計 |
 
 ## 禁止自製清單
 
@@ -71,4 +70,4 @@
 
 1. **P0**（首版必備）：Button、Input、Card、Sidebar、Topbar、Badge、DataTable、Skeleton、EmptyState、ErrorState、Dialog、FormField
 2. **P1**（功能完整）：Tabs、DropdownMenu、Select、Checkbox、Toast、StatCard
-3. **P2**（進階）：QueryBuilder、TemplatePicker、PartySelector
+3. **P2**（進階）：TemplatePicker、PartySelector
