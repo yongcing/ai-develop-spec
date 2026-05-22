@@ -11,6 +11,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 | 任務類型 | 必讀文件 |
 |---------|---------|
 | **任何指令執行前** | [00-architecture/local-toolchain.md](00-architecture/local-toolchain.md)（先確認本機 Node / JDK 版本對齊規格）|
+| **任何 UI 任務（畫面、互動、表單、列表…）** | [00-architecture/design-to-code-workflow.md](00-architecture/design-to-code-workflow.md)（5 階段、三份 spec、雙軌驗證；缺料 hard-stop 不准擅自實作）|
 | 前端元件/頁面 | [20-frontend/tech-stack.md](20-frontend/tech-stack.md) + [20-frontend/ai-generation-rules.md](20-frontend/ai-generation-rules.md) |
 | 後端 API/服務 | [30-backend/tech-stack.md](30-backend/tech-stack.md) + [30-backend/ai-generation-rules.md](30-backend/ai-generation-rules.md) + [00-architecture/api-contract-rules.md](00-architecture/api-contract-rules.md) |
 | 新增資料表/DB schema | [00-architecture/database-selection.md](00-architecture/database-selection.md) + 建立新 ADR |
