@@ -75,6 +75,32 @@ function use-jdk17 {
 - AI 執行 `mvn` 前若 `java --version` 不是 17.x，**先要求切換 JAVA_HOME**，不可繼續
 - 變更 `<maven.compiler.release>` 需 ADR
 
+## Python — 僅在 Python component 才需要
+
+詳見 [/30-backend-python/tech-stack.md](../30-backend-python/tech-stack.md)。
+
+### 安裝 `uv`（package manager + runtime 切換器）
+
+```powershell
+winget install --id=astral-sh.uv -e
+# 或 PowerShell: irm https://astral.sh/uv/install.ps1 | iex
+```
+
+### 安裝指定 Python 版本
+
+```powershell
+uv python install 3.12       # 跟 project 的 .python-version 對齊
+cd <python-project>
+uv sync                      # 依 uv.lock 安裝相依
+uv run python --version      # 應印 3.12.x
+```
+
+### AI 行為
+
+- AI 執行 `uv run`、`pytest` 等前，若 `uv python pin` 顯示版本與 `.python-version` 不符，**先切版**，不可繼續
+- AI 不得修改 `.python-version` 或 `pyproject.toml [project] requires-python`（變更需 ADR）
+- AI 不得 fallback 到 `pip install`（必須 `uv add` / `uv sync`）
+
 ## 其他工具
 
 | 工具 | 版本 | 安裝 |
@@ -83,14 +109,17 @@ function use-jdk17 {
 | Docker Desktop | 任意現行版 | `winget install Docker.DockerDesktop`，本機跑 Testcontainers / Compose 必備 |
 | Git | 2.40+ | 隨 Git for Windows / Git Bash 一起 |
 | gh CLI | 2.x | `winget install GitHub.cli` |
+| uv | latest | `winget install astral-sh.uv` |
 
 ## 版本驗證指令（每次開新終端機建議跑一次）
 
 ```powershell
 node --version    # v22.x
 npm --version     # 10.x 或 11.x
-java --version    # openjdk 17.x
-mvn --version     # 3.9+
+java --version    # openjdk 17.x (Java component)
+mvn --version     # 3.9+      (Java component)
+uv --version      # latest    (Python component)
+python --version  # 與專案 .python-version 一致 (Python component)
 docker --version  # 任意
 ```
 

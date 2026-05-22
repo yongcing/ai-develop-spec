@@ -14,12 +14,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 | 任務類型 | 起點 prompt | 重要前置 |
 |---------|------------|---------|
-| **任何指令執行前** | — | [00-architecture/local-toolchain.md](00-architecture/local-toolchain.md)（先確認本機 Node / JDK 版本對齊規格）|
+| **任何指令執行前** | — | [00-architecture/local-toolchain.md](00-architecture/local-toolchain.md)（先確認本機 Node / JDK / Python 版本對齊規格）|
 | **任何 UI 任務（畫面、互動、表單、列表…）** | [prompts/frontend-feature.md](prompts/frontend-feature.md) | 動工前 hard-stop：依 [00-architecture/design-to-code-workflow.md](00-architecture/design-to-code-workflow.md) 確認 `design/sections/<section>/{visual,behavior,data}/` 三份 spec 存在 |
 | 前端元件 / 頁面 | [prompts/frontend-feature.md](prompts/frontend-feature.md) | |
-| 後端 API / 服務 | [prompts/backend-endpoint.md](prompts/backend-endpoint.md) | |
+| 後端 API / 服務（**Java component**） | [prompts/backend-java-endpoint.md](prompts/backend-java-endpoint.md) | 確認 component README 標 `Language: Java` |
+| 後端 API / 服務（**Python component**） | [prompts/backend-python-endpoint.md](prompts/backend-python-endpoint.md) | 確認 component README 標 `Language: Python` |
+| Component 語言未標 / 不知該選哪個 | — | [30-backend/tech-decision.md](30-backend/tech-decision.md)；hard-stop 由架構師決定 |
 | 全端 CRUD | [prompts/full-stack-crud.md](prompts/full-stack-crud.md) | |
-| 新增資料表 / DB schema | [prompts/backend-endpoint.md](prompts/backend-endpoint.md) + [00-architecture/database-selection.md](00-architecture/database-selection.md) | 建立新 ADR |
+| 新增資料表 / DB schema | 對應語言 backend prompt + [00-architecture/database-selection.md](00-architecture/database-selection.md) | 建立新 ADR |
 | 跨服務的架構變更 | — | [00-architecture/system-architecture.md](00-architecture/system-architecture.md) + 建立新 ADR |
 
 ## 硬規則（不可違反）

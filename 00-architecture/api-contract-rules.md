@@ -31,7 +31,7 @@
 - **Token**：JWT（簽章演算法 RS256 或 ES256；對稱 HS256 僅限本機開發）
 - **傳送**：`Authorization: Bearer <jwt>`，禁止把 token 放 query string
 - **過期**：access token ≤ 1h；refresh 由前端透過 IdP 自處
-- **驗證**：後端 Spring Security Resource Server，自動驗 signature + `iss` + `aud` + `exp`
+- **驗證**：後端依語言實作（Java: Spring Security Resource Server / Python: FastAPI dependency + `python-jose`），自動驗 signature + `iss` + `aud` + `exp`
 - **Claims**：必含 `sub`（user id）、`email`、`roles`（或 `realm_access.roles`）；其餘自訂 claims 文件化
 
 ### Service-to-service 認證
@@ -42,17 +42,19 @@
 
 ### 授權
 
-- **位置**：method-level `@PreAuthorize`，禁止寫在 controller 之外
+- **位置**：在 service 層方法上做授權（Java: `@PreAuthorize`；Python: FastAPI `Depends(require_role(...))` 寫在 service 函式 entry）。禁止只靠 controller / router 層的 filter
 - **行級**：透過 Specification 或 query filter（owner / role），不能只靠 controller 過濾後讀全表
 - **拒絕策略**：未授權 → 403；未認證 → 401
 
 ## OpenAPI
 
-- **產生**：後端 springdoc-openapi 自動產出 OpenAPI 3.1 spec
+- **產生**：後端自動產 OpenAPI 3.1 spec（Java: springdoc-openapi；Python: FastAPI 內建 `/openapi.json`）
 - **位置**：runtime exposes `/v3/api-docs`；build 時匯出為 `docs/openapi.json` 入 repo
 - **校驗**：CI 驗 spec lint（spectral）
 - **前端**：用 `@rtk-query/codegen-openapi` 從匯出的 spec 自動產生 RTK Query API；生成檔放 `src/api/generated/`，禁止手改
-- **註解**：每個 endpoint 必須有 `@Operation(summary=…)`、`@ApiResponse` 完整、DTO 有 `@Schema` 描述
+- **註解**：每個 endpoint 必須有完整 metadata：
+  - Java: `@Operation(summary=…)`、`@ApiResponse(...)` 完整、DTO 有 `@Schema`
+  - Python: FastAPI decorator 帶 `summary`、`response_model`、`responses={...}`；Pydantic `Field(..., description="...", examples=[...])`
 
 ## Rate limiting / Throttling
 
@@ -95,4 +97,4 @@
 - 錯誤一律拋 RFC 7807，禁止自製錯誤 JSON 結構
 - 認證統一走 Bearer JWT；禁止 cookie session、API key in header（除非 ADR 同意）
 - 事件 publish/consume 必須走 CloudEvents 信封 + JSON Schema 驗證
-- 生成 controller 時自動加 `@Operation` 與 `@ApiResponse` 註解
+- 生成 endpoint 時自動加 OpenAPI metadata（Java: `@Operation` / `@ApiResponse`；Python: FastAPI decorator 含 `summary` / `response_model` / `responses`）

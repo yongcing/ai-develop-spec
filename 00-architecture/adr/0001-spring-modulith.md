@@ -70,10 +70,11 @@
 - AI 必須將新功能放入特定 module（`com.<org>.<module>.{controller,domain,infrastructure}`）
 - AI 跨模組溝通必須使用 ApplicationEvents 或目標模組 `domain` package 內以 `@NamedInterface` 標註的 SPI 介面
 - AI 不得直接 import 其他模組 `domain`（除 `@NamedInterface` 內介面）或 `infrastructure` 任何內容
-- 規則寫於 [/30-backend/ai-generation-rules.md](../../30-backend/ai-generation-rules.md) 與 [/30-backend/layering-rules.md](../../30-backend/layering-rules.md)
+- 規則寫於 [/30-backend-java/ai-generation-rules.md](../../30-backend-java/ai-generation-rules.md) 與 [/30-backend-java/layering-rules.md](../../30-backend-java/layering-rules.md)
 
 ## 相關文件
 
-- [/30-backend/tech-stack.md](../../30-backend/tech-stack.md)
-- [/30-backend/layering-rules.md](../../30-backend/layering-rules.md)
+- [/30-backend-java/tech-stack.md](../../30-backend-java/tech-stack.md)
+- [/30-backend-java/layering-rules.md](../../30-backend-java/layering-rules.md)
+- [/30-backend/tech-decision.md](../../30-backend/tech-decision.md)（Java vs Python 選型）
 - [Spring Modulith Reference](https://docs.spring.io/spring-modulith/reference/)

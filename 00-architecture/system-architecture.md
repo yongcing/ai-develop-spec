@@ -13,23 +13,34 @@
          │ HTTPS / REST + JWT
          ▼
 ┌────────────────────────────────────────────────────┐
-│ Spring Boot 3.3 Modular Monolith                   │
+│ Java Modular Monolith (主幹)                       │
+│ Spring Boot 3.3 + Spring Modulith                  │
 │ ┌──────────┬──────────┬──────────┬──────────────┐  │
-│ │ contracts│ templates│ directory│ queries / …  │  │
+│ │ module-a │ module-b │ module-c │ module-d / …│  │
 │ └────┬─────┴────┬─────┴────┬─────┴────┬─────────┘  │
-│      │ Spring Modulith 模組邊界           │           │
 │      ▼          ▼          ▼          ▼           │
 │   PostgreSQL  Redis    NATS JetStream  S3 (MinIO) │
-└────────────────────────────────────────────────────┘
+└─────────┬──────────────────────────────────────────┘
+          │ REST + JWT (sync)  /  NATS + CloudEvents (async)
+          ▼
+┌─────────────────────────────────────────────────┐
+│ Python services (按需獨立部署)                  │
+│ ┌──────────────┐  ┌──────────────┐              │
+│ │ ml-inference │  │ etl-pipeline │ ... 等       │
+│ │ FastAPI      │  │ FastAPI/Arq  │              │
+│ └──────────────┘  └──────────────┘              │
+└─────────────────────────────────────────────────┘
 ```
 
-部署：單一 Spring Boot fat jar 進 K8s Deployment，多副本搭配 Shedlock 處理排程一致性。
+**主幹**：Java modular monolith — 單一 Spring Boot fat jar 進 K8s Deployment，多副本搭配 Shedlock 處理排程一致性。
+
+**Python services**：按需新增（ML / 資料 / Python-only 整合 / batch），**獨立 K8s Deployment**，**不**嵌入 JVM。語言選型決策見 [/30-backend/tech-decision.md](../30-backend/tech-decision.md)。
 
 ## 分層原則（前端 + 後端）
 
 ### 後端（Spring Modulith）
 
-模組內維持三層（詳見 [/30-backend/layering-rules.md](../30-backend/layering-rules.md)）：
+Java 模組內維持三層（詳見 [/30-backend-java/layering-rules.md](../30-backend-java/layering-rules.md)；Python service 結構見 [/30-backend-python/layering-rules.md](../30-backend-python/layering-rules.md)）：
 
 ```
 controller/       →     domain/                 →     infrastructure/
@@ -64,7 +75,7 @@ src/
 
 ## 服務切分原則
 
-預設**單體 (Modular Monolith)**，符合 [/30-backend/tech-stack.md](../30-backend/tech-stack.md)。
+**Java 主幹預設單體 (Modular Monolith)**，符合 [/30-backend-java/tech-stack.md](../30-backend-java/tech-stack.md)。Python component 採用本身即為「拆服務」決策，見 [/30-backend/tech-decision.md](../30-backend/tech-decision.md)。
 
 ### 何時保持單體
 
