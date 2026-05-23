@@ -44,6 +44,38 @@
 - `traceId` 必填，取自 OpenTelemetry current span 或同等 tracing context
 - 欄位級錯誤放 `errors[]`（自訂擴充，符合 RFC 7807 允許）
 
+## 400 vs 422 split（語意分流，跨語言一致）
+
+`Validation`（400）與 `BusinessRule`（422）很容易混淆，**規則固定如下**：
+
+| 條件 | 400 Validation | 422 BusinessRule |
+|------|---------------|------------------|
+| 失敗發生在哪一層 | 反序列化 / Bean Validation / Pydantic 欄位驗證 | 通過 schema 後的領域邏輯 / 不變式 |
+| 看到的工具 | `@NotBlank` / `@Email` / `@Size` / `model_validator` 欄位錯誤 | service 拋出的領域 exception |
+| 是否需要查 DB / 跨資源 | 否 | 通常是（要讀現有 state 才判得出來） |
+| Problem `type` slug | `validation` | `business-rule-violation` |
+
+### 400 範例（schema / 欄位驗證）
+
+1. `POST /api/v1/users` body 缺 `username`：Bean Validation `@NotBlank` 失敗 → `errors[]` 列出 `{field:"username", code:"NotBlank"}`。
+2. `PATCH /api/v1/me/profile` body `email` 為 `not-an-email`：Pydantic / Bean Validation `@Email` 失敗 → `errors[]` 列出 `{field:"email", code:"Email"}`。
+
+### 422 範例（業務規則 / 不變式）
+
+1. `POST /api/v1/alarms/{id}/reopen` 距離 `closedAt` 已超過 7 天：schema 合法、欄位齊全，但領域規則禁止 → `type=…/business-rule-violation`、`detail="cannot reopen alarm closed more than 7 days ago"`。
+2. `POST /api/v1/skills/{slug}/versions/{vid}/promote` 嘗試 promote 一個 `draft` 但尚未通過 lint 的 version：schema 合法，業務規則違反（必須先 lint pass） → `type=…/business-rule-violation`。
+
+> 經驗法則：「光看 request body / path / query 就能判定錯誤」= 400；「要結合 DB / 既有資源狀態才能判定」= 422。
+
+## Problem `type` URI base
+
+- 通用建議：`https://api.example.com/problems/<slug>`（spec 範例）。
+- **內部專用平台例外**：若服務不公開、`type` 無對外瀏覽需求，**可以**使用非可路由的內部 domain 佔位（例如 `https://aiops.example.com/errors/<slug>`），前提是：
+  - 在該產品的 ADR 中明文記錄此選擇；
+  - 全產品內所有 service 對齊同一個 base（不可混用）；
+  - slug 仍須使用 kebab-case 且與本檔語意分類對齊（`validation` / `not-found` / `conflict` / `business-rule-violation` / `forbidden` / `quota-exceeded` …）。
+- 不論選哪個 base，URI **不必真能解析**，但 stem 必須對齊。
+
 ## 通用規則（跨語言）
 
 - ✅ 業務邏輯層拋語意明確的 exception；HTTP 層集中轉成 Problem Details，**不在每個 endpoint try-catch**
